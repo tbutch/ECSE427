@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "node.h"
-#include "shell.h"
+#include "../inc/node.h"
+#include "../inc/shell.h"
 
 // *************************************
 // Function prototypes

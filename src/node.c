@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "node.h"
+#include "../inc/node.h"
 
 /**
  * Create new node with no value
