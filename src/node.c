@@ -91,7 +91,7 @@ char * convertListToString(node * head){
     while(head->next != NULL){
         str[i] = head->next->val;
         i++;
-        head=head->next;
+        head= head->next;
     }
     return str;
 }
