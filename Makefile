@@ -14,8 +14,9 @@ endif
 
 all: $(programName)
 
-$(programName): ./$(buildDir)/shell.o ./$(buildDir)/interpreter.o ./$(buildDir)/shellmemory.o ./$(buildDir)/node.o 
-	$(CC) -o $(programName) ./$(buildDir)/shell.o ./$(buildDir)/interpreter.o ./$(buildDir)/shellmemory.o ./$(buildDir)/node.o
+$(programName): ./$(buildDir)/shell.o ./$(buildDir)/interpreter.o ./$(buildDir)/shellmemory.o #./$(buildDir)/node.o 
+	# To compile node, add ./$(buildDir)/node.o to end
+	$(CC) -o $(programName) ./$(buildDir)/shell.o ./$(buildDir)/interpreter.o ./$(buildDir)/shellmemory.o 
 
 # Shell.c plus any libraries used to build shell.c
 ./$(buildDir)/shell.o: $(srcDir)/shell.c $(srcDir)/interpreter.c $(srcDir)/shellmemory.c $(srcDir)/node.c $(incDir)/shell.h $(incDir)/interpreter.h $(incDir)/shellmemory.h $(incDir)/node.h 
@@ -32,9 +33,9 @@ $(programName): ./$(buildDir)/shell.o ./$(buildDir)/interpreter.o ./$(buildDir)/
 	$(CC) $(CFLAGS) $(srcDir)/shellmemory.c
 	mv shellmemory.o ./$(buildDir)/
 
-./$(buildDir)/node.o: $(srcDir)/node.c $(incDir)/node.h
-	$(CC) $(CFLAGS) $(srcDir)/node.c
-	mv node.o ./$(buildDir)/
+# ./$(buildDir)/node.o: $(srcDir)/node.c $(incDir)/node.h
+# 	$(CC) $(CFLAGS) $(srcDir)/node.c
+# 	mv node.o ./$(buildDir)/
 
 clean:
 	rm -f *.exe ./build/*.o mysh

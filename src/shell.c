@@ -1,83 +1,64 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+// File includes
 #include "../inc/node.h"
 #include "../inc/shell.h"
 #include "../inc/interpreter.h"
+#include "../inc/shellmemory.h"
 
 // *************************************
 // Function prototypes
-void parse();
 char * getInput();
 void printWelcomeText();
 char * getInput();
+void initShellMemory(mem_t * shellMemory[]);
+void runScriptFromCommandLine(int argc, char ** argv, mem_t * shellMemory[], int shellMemorySize);
+
 // *************************************
 
 // Global Variables
 char prompt[100] = {'$', ' '};
 char userInput[1000];
-int errorCode = 0;
+int status = 0;
 //
 
 
 int main(int argc, char** argv){
+    mem_t * shellMemory[SHELL_MEMORY_SIZE];
+    initShellMemory(shellMemory);
     printWelcomeText();
     while(1) {
         printf("%s", prompt);
         fgets(userInput, INPUT_SIZE -1, stdin);
-        parse(userInput);
-    }   
-}
 
-/**
- * Function used to parse user input. Uses the user input
- * array and tokenizes it into words in a 2D array, which
- * is passed to the interpreter.
- * 
- */
-void parse(char input[]){
-    int i = 0;
-    int wordCount = 0;
-    int currWordLength = 0;
-    char currWord[100];
-    char * wordArray[100]; // Word array, of length 100
-
-    // Parse input string while not null
-    while(input[i] != '\0'){
-        char currentChar = input[i];
-
-        // If the currentChar is not a space, add it to the 
-        // current string
+        status = parseAndEvaluate(userInput, shellMemory, SHELL_MEMORY_SIZE);
         
-        if(currentChar == ' '){
-            // If it is a space, add a null to the end of the current
-            // word and add it to the word array
-            currWord[currWordLength] = '\0';
-            wordArray[wordCount] = strdup(currWord);
-            strcpy(currWord,"");
-            currWordLength = 0;
-            wordCount++;
-        } 
-        // if end of string
-        else if(currentChar == '\n'){
-            currWord[currWordLength] = '\0';
-            wordArray[wordCount] = strdup(currWord);
-            strcpy(currWord,"");
-            wordCount++;
-            break;
+        if(status == SUCCESS || status == MALFORMED_COMMAND){
+            // Malformed command is handled by the interpreter
+            // Success is good!
+        } else if(status == QUIT_TERMINAL){
+            // graceful exit requested
+            printf("Bye!\n");
+            freeShellMemory(shellMemory, SHELL_MEMORY_SIZE);
+            return 0;
         }
-        else {
-            currWord[currWordLength] = currentChar;
-            currWordLength++;
-        }
-        i++;
-    }
-    strcpy(currWord,"\0");
-    wordArray[wordCount] = strdup(currWord); 
-    parseInput(wordArray);
+    }   
 }
 
 void printWelcomeText(){
     printf("Welcome to the Tristan Bouchard shell!\n");
     printf("Version 1.0 Created January 2020\n");
+}
+
+void initShellMemory(mem_t * shellMemory[]){
+    char nullVal[] = "\0";
+    for(int i = 0; i < SHELL_MEMORY_SIZE; i++){
+        shellMemory[i] = malloc(sizeof(mem_t));
+        shellMemory[i]->var = malloc(strlen(nullVal) * sizeof(char));
+        shellMemory[i]->value = malloc(strlen(nullVal) * sizeof(char));
+        shellMemory[i]->value = strdup(nullVal);
+        shellMemory[i]->var = strdup(nullVal);
+    }
 }

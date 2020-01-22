@@ -7,7 +7,7 @@
  */
 node * createNode(){
     node * newNode = (node *) malloc(sizeof(node));
-    newNode->next =NULL;
+    newNode->next = NULL;
     return newNode;
 }
 
@@ -89,9 +89,9 @@ char * convertListToString(node * head){
     str[i] = head->val;
     i++;
     while(head->next != NULL){
-        str[i] = head->next->val;
+        str[i] = (char) head->next->val;
         i++;
-        head= head->next;
+        head= (node *) head->next;
     }
     return str;
 }
