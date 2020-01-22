@@ -19,8 +19,8 @@ void runScriptFromCommandLine(int argc, char ** argv, mem_t * shellMemory[], int
 // *************************************
 
 // Global Variables
-char prompt[100] = {'$', ' '};
-char userInput[1000];
+char prompt[USER_LINE_INPUT_SIZE] = {'$', ' '};
+char userInput[USER_LINE_INPUT_SIZE];
 int status = 0;
 //
 
@@ -31,9 +31,9 @@ int main(int argc, char** argv){
     printWelcomeText();
     while(1) {
         printf("%s", prompt);
-        fgets(userInput, INPUT_SIZE -1, stdin);
+        fgets(userInput, USER_LINE_INPUT_SIZE -1, stdin);
 
-        status = parseAndEvaluate(userInput, shellMemory, SHELL_MEMORY_SIZE);
+        status = parseAndEvaluate(userInput, shellMemory, SHELL_MEMORY_SIZE, USER_LINE_INPUT_SIZE);
         
         if(status == SUCCESS || status == MALFORMED_COMMAND){
             // Malformed command is handled by the interpreter

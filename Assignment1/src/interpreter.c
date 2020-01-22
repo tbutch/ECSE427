@@ -13,7 +13,8 @@ int getLengthOfInput(char * wordsArray[], int shellMemoryMaxSize);
 int setVariableToShellMemory(char * wordsArray[], mem_t * shellMemory[], int shellMemoryMaxSize);
 int printShellVariable(char * wordsArray[], mem_t * shellMemory[], int shellMemoryMaxSize);
 void printHelpScreen();
-int runScript(char * wordArray[], mem_t * shellMemory[], int shellMemoryMaxSize);
+int runScript(char * wordArray[], mem_t * shellMemory[], int shellMemoryMaxSize, int maxInputSize);
+int parseInput(char * wordArray[], mem_t * shellMemory[], int shellMemoryMaxSize, int maxInputSize);
 
 /**
  * 
@@ -28,12 +29,12 @@ int runScript(char * wordArray[], mem_t * shellMemory[], int shellMemoryMaxSize)
  * 
  *  Returns: Whatever the parser returns
  */
-int parseAndEvaluate(char input[], mem_t * shellMemory[], int shellMemoryMaxSize){
+int parseAndEvaluate(char input[], mem_t * shellMemory[], int shellMemoryMaxSize, int maxInputSize){
     int i = 0;
     int wordCount = 0;
     int currWordLength = 0;
-    char currWord[100];
-    char * wordArray[100]; // Word array, of length 100
+    char currWord[maxInputSize];
+    char * wordArray[maxInputSize]; // Word array, of length 100
 
     // Parse input string while not null
     while(input[i] != '\0'){
@@ -71,7 +72,7 @@ int parseAndEvaluate(char input[], mem_t * shellMemory[], int shellMemoryMaxSize
     }
     strcpy(currWord,"\0");
     wordArray[wordCount] = strdup(currWord); 
-    return parseInput(wordArray, shellMemory, shellMemoryMaxSize);
+    return parseInput(wordArray, shellMemory, shellMemoryMaxSize, maxInputSize);
 }
 
 /*
@@ -88,7 +89,7 @@ int parseAndEvaluate(char input[], mem_t * shellMemory[], int shellMemoryMaxSize
  *           3 on existing but malformed command
  *          
  */
-int parseInput(char * wordArray[], mem_t * shellMemory[], int shellMemoryMaxSize){
+int parseInput(char * wordArray[], mem_t * shellMemory[], int shellMemoryMaxSize, int maxInputSize){
     int i = 0;
     int errorCode;
 
@@ -115,7 +116,7 @@ int parseInput(char * wordArray[], mem_t * shellMemory[], int shellMemoryMaxSize
             errorCode = printShellVariable(wordArray, shellMemory, shellMemoryMaxSize);
         }
         else if(isEqual(wordArray[0], (char *) runCommand)){
-            errorCode = runScript(wordArray, shellMemory, shellMemoryMaxSize);
+            errorCode = runScript(wordArray, shellMemory, shellMemoryMaxSize, maxInputSize);
         }
         else {
             unknownCommand();
@@ -259,7 +260,7 @@ void printHelpScreen(){
  * 
  *  Returns: 1 on success, -1 on nonexistent file, 0 error;
  */
-int runScript(char * wordArray[], mem_t * shellMemory[], int shellMemoryMaxSize){
+int runScript(char * wordArray[], mem_t * shellMemory[], int shellMemoryMaxSize, int maxInputSize){
     char * fileName = wordArray[1];
     int lengthOfInput = getLengthOfInput(wordArray, shellMemoryMaxSize);
     if(lengthOfInput < 2){
@@ -272,7 +273,7 @@ int runScript(char * wordArray[], mem_t * shellMemory[], int shellMemoryMaxSize)
     char currLine[shellMemoryMaxSize];
     int status;
     while(fgets(currLine, shellMemoryMaxSize-1, file)){
-        status = parseAndEvaluate(currLine, shellMemory, shellMemoryMaxSize);
+        status = parseAndEvaluate(currLine, shellMemory, shellMemoryMaxSize, maxInputSize);
         if(status == QUIT_TERMINAL){
             // Quit command was entered
             break;
