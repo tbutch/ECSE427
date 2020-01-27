@@ -268,6 +268,7 @@ int runScript(char * wordArray[], mem_t * shellMemory[], int shellMemoryMaxSize,
     }
     FILE * file = fopen(fileName, "r");
     if(file == NULL){
+        printf("Error opening file %s\n", fileName);
         return FATAL_ERROR;
     }
     char currLine[shellMemoryMaxSize];

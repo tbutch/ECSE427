@@ -56,8 +56,6 @@ void initShellMemory(mem_t * shellMemory[]){
     char nullVal[] = "\0";
     for(int i = 0; i < SHELL_MEMORY_SIZE; i++){
         shellMemory[i] = malloc(sizeof(mem_t));
-        shellMemory[i]->var = malloc(strlen(nullVal) * sizeof(char));
-        shellMemory[i]->value = malloc(strlen(nullVal) * sizeof(char));
         shellMemory[i]->value = strdup(nullVal);
         shellMemory[i]->var = strdup(nullVal);
     }

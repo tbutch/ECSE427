@@ -66,6 +66,7 @@ int addMemoryNodeToShellMem(mem_t * shellMemory[], int maxMemSize, char * wordsA
         i++;
     }
     if(i == maxMemSize){
+        printf("Shell memory is now full, cannot add variable\n");
         return FAILURE;
     }
     // Concatenate the rest of the available arguments into one string
@@ -90,8 +91,8 @@ int addMemoryNodeToShellMemAtIndex(mem_t * shellMemory[], int maxMemSize, char *
     char * str = wordsArray[2];
     free(shellMemory[index]->var);
     free(shellMemory[index]->value);
-    shellMemory[index]->var = malloc((strlen(wordsArray[1]) + 1) * sizeof(char));
-    shellMemory[index]->value = malloc((strlen(str) + 1) * sizeof(char));
+    //shellMemory[index]->var = malloc((strlen(wordsArray[1]) + 1) * sizeof(char));
+    //shellMemory[index]->value = malloc((strlen(str) + 1) * sizeof(char));
     shellMemory[index]->var = strdup(wordsArray[1]);
     shellMemory[index]->value = strdup(str);
     return SUCCESS;
