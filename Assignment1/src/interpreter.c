@@ -99,10 +99,10 @@ int parseInput(char * wordArray[], mem_t * shellMemory[], int shellMemoryMaxSize
     }
     else{
         // Compare
-        // Set cmd to lowercase 
-        for(int i = 0; wordArray[0][i]; i++){
-            wordArray[0][i] = tolower(wordArray[0][i]);
-        }
+        // Set cmd to lowercase - Not required for this assignment
+        // for(int i = 0; wordArray[0][i]; i++){
+        //     wordArray[0][i] = tolower(wordArray[0][i]);
+        // }
         if(isEqual(wordArray[0], (char *) helpCommand)){
             printHelpScreen();
         }

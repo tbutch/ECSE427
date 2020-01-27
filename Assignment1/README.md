@@ -37,3 +37,4 @@ This shell also assumes certain specifications, based on information gathered on
 - A well formed script continues execution of the script until the quit command is hit, even if a malformed command is found in the script.
 - A script containing recursion must be let to recurse infinitely, similarly to what the bash shell does. At one point, the "fopen" function returns null and cannot open the file, which ends the recursion.
 - A script does not need to be terminated by the ".txt" extension, the filename can be anything.
+- Commands are case sensitive.

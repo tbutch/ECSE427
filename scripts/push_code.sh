@@ -22,8 +22,15 @@ showMenu() {
 
 displayHelp() {
     echo "Configure the script destination and source in this script."
-    echo "This script copies its parent directory to the specified"
-    echo "destination on the source system."
+    echo "This script should be placed as follows:"
+    echo "    ."
+    echo "├── Assignment1"
+    echo "│   ├── ..."
+    echo "└── scripts"
+    echo "    └── push_code.sh"
+    echo ""
+    echo "It copies the parent folder (aka the one containing both the /scripts"
+    echo "and the /Assignment1 directories to the destination"
 }
 
 while [[ "$m" != "4" ]]
