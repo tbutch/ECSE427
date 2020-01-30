@@ -1,3 +1,13 @@
+/**
+ * interpreter.c file. This file contains functions to interpret the given commands from 
+ * the command prompt. Most of the code to this assignment can be found here, as it contains
+ * not only the functions to run the commands but also most of the helper functions.
+ * 
+ * Author: Tristan Bouchard
+ * Date: January 29 2020
+ * 
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -5,8 +15,9 @@
 
 // File includes
 #include "../inc/interpreter.h"
+#include "../inc/shell.h"
 
-//Function prototypes
+// Function prototypes
 int isEqual(char str1[], char str2[]);
 void unknownCommand();
 int getLengthOfInput(char * wordsArray[], int shellMemoryMaxSize);
@@ -15,11 +26,11 @@ int printShellVariable(char * wordsArray[], mem_t * shellMemory[], int shellMemo
 void printHelpScreen();
 int runScript(char * wordArray[], mem_t * shellMemory[], int shellMemoryMaxSize, int maxInputSize);
 int parseInput(char * wordArray[], mem_t * shellMemory[], int shellMemoryMaxSize, int maxInputSize);
+void wipeWords(char * wordArray[], int arrayLength);
 
-/**
- * 
- * 
- */
+// Define global array to avoid segfault lol
+char * wordArray[SHELL_MEMORY_SIZE];
+
 /*
  * Function: tokenize
  * -----------------------------------------------------------------------
@@ -30,12 +41,15 @@ int parseInput(char * wordArray[], mem_t * shellMemory[], int shellMemoryMaxSize
  *  Returns: Whatever the parser returns
  */
 int parseAndEvaluate(char input[], mem_t * shellMemory[], int shellMemoryMaxSize, int maxInputSize){
+    
     int i = 0;
     int wordCount = 0;
     int currWordLength = 0;
+    
     char currWord[maxInputSize];
-    char * wordArray[maxInputSize]; // Word array, of length 100
-
+    // make all values null in words array
+    wipeWords(wordArray, shellMemoryMaxSize);
+    
     // Parse input string while not null
     while(input[i] != '\0'){
         char currentChar = input[i];
@@ -52,7 +66,7 @@ int parseAndEvaluate(char input[], mem_t * shellMemory[], int shellMemoryMaxSize
                 currWordLength = 0;
                 wordCount++;
             } else {
-                // just skip it!
+                // just skip it! This solves inputs with lots of spaces between commands
             }
             
         } 
@@ -65,11 +79,14 @@ int parseAndEvaluate(char input[], mem_t * shellMemory[], int shellMemoryMaxSize
             break;
         }
         else {
+            // Add the current character to the current work and increment the length
+            // of the current word
             currWord[currWordLength] = currentChar;
             currWordLength++;
         }
         i++;
     }
+    // Add a null word at the end of the word array to mark the end
     strcpy(currWord,"\0");
     wordArray[wordCount] = strdup(currWord); 
     return parseInput(wordArray, shellMemory, shellMemoryMaxSize, maxInputSize);
@@ -98,11 +115,14 @@ int parseInput(char * wordArray[], mem_t * shellMemory[], int shellMemoryMaxSize
         return FATAL_ERROR;
     }
     else{
-        // Compare
+        
         // Set cmd to lowercase - Not required for this assignment
         // for(int i = 0; wordArray[0][i]; i++){
         //     wordArray[0][i] = tolower(wordArray[0][i]);
         // }
+
+        // Compare
+        // Here, we cast to (char *) because cont char *  != char *
         if(isEqual(wordArray[0], (char *) helpCommand)){
             printHelpScreen();
         }
@@ -123,7 +143,7 @@ int parseInput(char * wordArray[], mem_t * shellMemory[], int shellMemoryMaxSize
             return UNKOWN_COMMAND;
         }
 
-        // Verify the errorCode
+        // Verify the errorCode if not already handled by the command
         if(errorCode == MALFORMED_COMMAND){
             // Malformed command
             printf("Malformed %s command\n", wordArray[0]);
@@ -133,6 +153,7 @@ int parseInput(char * wordArray[], mem_t * shellMemory[], int shellMemoryMaxSize
         } else if (errorCode == SUCCESS){
             // All good!
         } else if(errorCode == QUIT_TERMINAL) {
+            // This section is used when running scripts
             printf("Bye!\n");
         }
     }
@@ -196,6 +217,8 @@ int setVariableToShellMemory(char * wordsArray[], mem_t * shellMemory[], int she
         // Malformed command
         return MALFORMED_COMMAND;
     }
+    // Verify if variable already exists in shell memory, if not (and not full) add it, if
+    // it is, replace its value with the newly specified one
     if(!variableExistsInMemory(shellMemory, wordsArray[1], shellMemoryMaxSize)){
         return addMemoryNodeToShellMem(shellMemory, shellMemoryMaxSize, wordsArray, wordCount);
     } else {
@@ -210,7 +233,6 @@ int setVariableToShellMemory(char * wordsArray[], mem_t * shellMemory[], int she
  *  "Variable does not exist".
  * 
  *  Returns: 
- *           0 - On failure,
  *           1 - On success 
  *           3 - On malformed command.
  */
@@ -289,4 +311,10 @@ int runScript(char * wordArray[], mem_t * shellMemory[], int shellMemoryMaxSize,
     }
     fclose(file);
     return status;
+}
+
+void wipeWords(char * wordArray[], int arrayLength){
+    for(int w = 0; w < arrayLength; w++){
+        wordArray[w] = strdup("\0");
+    }
 }

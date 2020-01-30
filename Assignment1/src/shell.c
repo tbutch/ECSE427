@@ -1,3 +1,13 @@
+/**
+ * Main program file of the Tristan Bouchard shell, which contains the main() function.
+ * All assumtions taken when programming this assignment are available in the 
+ * README.md file in the Assignment1 directory
+ * 
+ * Author: Tristan Bouchard
+ * Date: January 29 2020
+ * 
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -24,7 +34,13 @@ char userInput[USER_LINE_INPUT_SIZE];
 int status = 0;
 //
 
-
+/*
+ * Public function: main(char argc, cha* argc[])
+ * -----------------------------------------------------------------------
+ *  Main program entry
+ * 
+ *  Returns: 0 if successful, 1 if not.
+ */
 int main(int argc, char** argv){
     mem_t * shellMemory[SHELL_MEMORY_SIZE];
     initShellMemory(shellMemory);
@@ -47,14 +63,30 @@ int main(int argc, char** argv){
     }   
 }
 
+/*
+ * Private function: printWelcomeText()
+ * -----------------------------------------------------------------------
+ *  Prints the welcome text when the terminal is opened
+ * 
+ *  Returns: void
+ */
 void printWelcomeText(){
     printf("Welcome to the Tristan Bouchard shell!\n");
     printf("Version 1.0 Created January 2020\n");
 }
 
+/*
+ * Private function: addMemoryNodeToShellMem
+ * -----------------------------------------------------------------------
+ *  Function used to initialize the shell memory to null values
+ * 
+ *  Returns: 1 if successful, 0 if not.
+ */
 void initShellMemory(mem_t * shellMemory[]){
     char nullVal[] = "\0";
     for(int i = 0; i < SHELL_MEMORY_SIZE; i++){
+        // Use the strdup function here to duplicate the local string and 
+        // return the address of the duplicated string.
         shellMemory[i] = malloc(sizeof(mem_t));
         shellMemory[i]->value = strdup(nullVal);
         shellMemory[i]->var = strdup(nullVal);

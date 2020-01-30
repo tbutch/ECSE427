@@ -24,7 +24,7 @@ $(programName): ./$(buildDir)/shell.o ./$(buildDir)/interpreter.o ./$(buildDir)/
 	mv shell.o ./$(buildDir)/
 
 # interpreter.c plus any libraries
-./$(buildDir)/interpreter.o: $(srcDir)/interpreter.c $(incDir)/interpreter.h
+./$(buildDir)/interpreter.o: $(srcDir)/interpreter.c $(incDir)/interpreter.h $(incDir)/shell.h
 	$(CC) $(CFLAGS) $(srcDir)/interpreter.c
 	mv interpreter.o ./$(buildDir)/
 

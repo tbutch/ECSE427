@@ -1,7 +1,7 @@
 # Assignment 1: mysh
 
 ## Introduction
-This shell was created by Tristan Bouchard in January of 2020. It currently supports the commands specified when running the "help" command. The source code can be compiled both on Windows and Linux machines using the supplied Makefile. It can also be compiled with debugging symbols using the `make DEBUG=1` flag, which enables the required symbols to debug with gdb.
+This shell was created by Tristan Bouchard in January of 2020 and submitted January 29th 2020. It currently supports the commands specified when running the "help" command. The source code can be compiled both on Windows and Linux machines using the supplied Makefile. It can also be compiled with debugging symbols using the `make DEBUG=1` flag, which enables the required symbols to debug with gdb.
 
 The resulting executable, `mysh.exe` or `mysh` depending on the machine it was compiled on, can then be run on its own:
 
@@ -38,3 +38,4 @@ This shell also assumes certain specifications, based on information gathered on
 - A script containing recursion must be let to recurse infinitely, similarly to what the bash shell does. At one point, the "fopen" function returns null and cannot open the file, which ends the recursion.
 - A script does not need to be terminated by the ".txt" extension, the filename can be anything.
 - Commands are case sensitive.
+- Commands can contain more than one space between keywords.
