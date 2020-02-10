@@ -1,11 +1,13 @@
 
-programName:=mysh
+programName:=mykernel
 CC:=gcc
 CFLAGS:=-c
 srcDir:=src
 buildDir:=build
 incDir:=inc
 
+kernelDependencies:=$(srcDir)/kernel.c $(incDir)/kernel.h $(srcDir)/shell.c $(incDir)/shell.h $(srcDir)/pcb.c $(incDir)/pcb.h $(srcDir)/ram.c $(incDir)/ram.h 
+shellDependencies:=$(srcDir)/shell.c $(srcDir)/interpreter.c $(srcDir)/shellmemory.c $(incDir)/shell.h $(incDir)/interpreter.h $(incDir)/shellmemory.h 
 
 ifeq  ($(DEBUG), 1)
 	CFLAGS+= -ggdb3
@@ -14,12 +16,11 @@ endif
 
 all: $(programName)
 
-$(programName): ./$(buildDir)/shell.o ./$(buildDir)/interpreter.o ./$(buildDir)/shellmemory.o #./$(buildDir)/node.o 
-	# To compile node, add ./$(buildDir)/node.o to end
-	$(CC) -o $(programName) ./$(buildDir)/shell.o ./$(buildDir)/interpreter.o ./$(buildDir)/shellmemory.o 
+$(programName): ./$(buildDir)/kernel.o ./$(buildDir)/shell.o ./$(buildDir)/interpreter.o ./$(buildDir)/shellmemory.o ./$(buildDir)/ram.o ./$(buildDir)/pcb.o
+	$(CC) -o $(programName) ./$(buildDir)/kernel.o ./$(buildDir)/shell.o ./$(buildDir)/interpreter.o ./$(buildDir)/shellmemory.o ./$(buildDir)/ram.o ./$(buildDir)/pcb.o
 
 # Shell.c plus any libraries used to build shell.c
-./$(buildDir)/shell.o: $(srcDir)/shell.c $(srcDir)/interpreter.c $(srcDir)/shellmemory.c $(srcDir)/node.c $(incDir)/shell.h $(incDir)/interpreter.h $(incDir)/shellmemory.h $(incDir)/node.h 
+./$(buildDir)/shell.o: $(shellDependencies)
 	$(CC) $(CFLAGS) $(srcDir)/shell.c
 	mv shell.o ./$(buildDir)/
 
@@ -33,23 +34,26 @@ $(programName): ./$(buildDir)/shell.o ./$(buildDir)/interpreter.o ./$(buildDir)/
 	$(CC) $(CFLAGS) $(srcDir)/shellmemory.c
 	mv shellmemory.o ./$(buildDir)/
 
-# ./$(buildDir)/node.o: $(srcDir)/node.c $(incDir)/node.h
-# 	$(CC) $(CFLAGS) $(srcDir)/node.c
-# 	mv node.o ./$(buildDir)/
-
 # cpu.c plus any libraries
 ./$(buildDir)/cpu.o: $(srcDir)/cpu.c $(incDir)/cpu.h
 	$(CC) $(CFLAGS) $(srcDir)/cpu.c
 	mv cpu.o ./$(buildDir)/
 
 # kernel.c plus any libraries
-./$(buildDir)/kernel.o: $(srcDir)/shell.c $(incDir)/shell.h $(srcDir)/interpreter.c $(incDir)/interpreter.h
+./$(buildDir)/kernel.o: $(kernelDependencies) 
 	$(CC) $(CFLAGS) $(srcDir)/kernel.c
 	mv kernel.o ./$(buildDir)/
 
+# pcb.c plus any libraries
 ./$(buildDir)/pcb.o: $(srcDir)/pcb.c $(incDir)/pcb.h
 	$(CC) $(CFLAGS) $(srcDir)/pcb.c
 	mv pcb.o ./$(buildDir)/
 
+# ram.c plus any libraries
+./$(buildDir)/ram.o: $(srcDir)/ram.c $(incDir)/ram.h
+	$(CC) $(CFLAGS) $(srcDir)/ram.c
+	mv ram.o ./$(buildDir)/
+
+.PHONY: clean
 clean:
 	rm -f *.exe ./build/*.o mysh
