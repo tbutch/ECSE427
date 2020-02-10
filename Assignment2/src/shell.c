@@ -13,7 +13,6 @@
 #include <string.h>
 
 // File includes
-#include "../inc/node.h"
 #include "../inc/shell.h"
 #include "../inc/interpreter.h"
 #include "../inc/shellmemory.h"
@@ -41,7 +40,7 @@ int status = 0;
  * 
  *  Returns: 0 if successful, 1 if not.
  */
-int main(int argc, char** argv){
+int shellUI(int argc, char** argv){
     mem_t * shellMemory[SHELL_MEMORY_SIZE];
     initShellMemory(shellMemory);
     printWelcomeText();
@@ -71,8 +70,9 @@ int main(int argc, char** argv){
  *  Returns: void
  */
 void printWelcomeText(){
+    printf("Kernel 1.0 loaded!\n");
     printf("Welcome to the Tristan Bouchard shell!\n");
-    printf("Version 1.0 Created January 2020\n");
+    printf("Version 2.0 Updated February 2020\n");
 }
 
 /*

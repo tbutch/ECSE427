@@ -12,6 +12,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <stdbool.h>
 
 // File includes
 #include "../inc/interpreter.h"
@@ -20,13 +21,14 @@
 // Function prototypes
 int isEqual(char str1[], char str2[]);
 void unknownCommand();
-int getLengthOfInput(char * wordsArray[], int shellMemoryMaxSize);
+int getLengthOfInput(char * wordsArray[]);
 int setVariableToShellMemory(char * wordsArray[], mem_t * shellMemory[], int shellMemoryMaxSize);
 int printShellVariable(char * wordsArray[], mem_t * shellMemory[], int shellMemoryMaxSize);
 void printHelpScreen();
 int runScript(char * wordArray[], mem_t * shellMemory[], int shellMemoryMaxSize, int maxInputSize);
 int parseInput(char * wordArray[], mem_t * shellMemory[], int shellMemoryMaxSize, int maxInputSize);
 void wipeWords(char * wordArray[], int arrayLength);
+int exec(char * wordArray[], mem_t * shellMemory[], int shellMemoryMaxSize, int maxInputSize);
 
 // Define global array to avoid segfault lol
 char * wordArray[SHELL_MEMORY_SIZE];
@@ -126,7 +128,7 @@ int parseInput(char * wordArray[], mem_t * shellMemory[], int shellMemoryMaxSize
         if(isEqual(wordArray[0], (char *) helpCommand)){
             printHelpScreen();
         }
-        else if(isEqual(wordArray[0], (char *) quitCommand)){
+        else if(isEqual(wordArray[0], (char *) quitCommand) || isEqual(wordArray[0], (char *) exitCommand)){
             return QUIT_TERMINAL;
         }
         else if(isEqual(wordArray[0], (char *) setCommand)){
@@ -137,6 +139,8 @@ int parseInput(char * wordArray[], mem_t * shellMemory[], int shellMemoryMaxSize
         }
         else if(isEqual(wordArray[0], (char *) runCommand)){
             errorCode = runScript(wordArray, shellMemory, shellMemoryMaxSize, maxInputSize);
+        } else if(isEqual(wordArray[0], (char *) execCommand)){
+            errorCode = exec(wordArray, shellMemory, shellMemoryMaxSize, maxInputSize);
         }
         else {
             unknownCommand();
@@ -155,6 +159,8 @@ int parseInput(char * wordArray[], mem_t * shellMemory[], int shellMemoryMaxSize
         } else if(errorCode == QUIT_TERMINAL) {
             // This section is used when running scripts
             printf("Bye!\n");
+        } else if(errorCode == FATAL_ERROR){
+            printf("Fatal error occured in %s command\n", wordArray[0]);
         }
     }
     return SUCCESS;
@@ -193,7 +199,7 @@ void unknownCommand(){
  * 
  *  Returns: int size of word array
  */
-int getLengthOfInput(char * wordsArray[], int shellMemoryMaxSize){
+int getLengthOfInput(char * wordsArray[]){
     int i = 0;
     while(!isEqual(wordsArray[i],"")){
         i++;
@@ -212,7 +218,7 @@ int getLengthOfInput(char * wordsArray[], int shellMemoryMaxSize){
  *           3 - On malformed command
  */
 int setVariableToShellMemory(char * wordsArray[], mem_t * shellMemory[], int shellMemoryMaxSize){
-    int wordCount = getLengthOfInput(wordsArray, shellMemoryMaxSize);
+    int wordCount = getLengthOfInput(wordsArray);
     if(wordCount < 3){
         // Malformed command
         return MALFORMED_COMMAND;
@@ -237,7 +243,7 @@ int setVariableToShellMemory(char * wordsArray[], mem_t * shellMemory[], int she
  *           3 - On malformed command.
  */
 int printShellVariable(char * wordsArray[], mem_t * shellMemory[], int shellMemoryMaxSize){
-    int inputLength = getLengthOfInput(wordsArray, shellMemoryMaxSize);
+    int inputLength = getLengthOfInput(wordsArray);
     if(inputLength != 2){
         // Malformed command
         return MALFORMED_COMMAND;
@@ -284,7 +290,7 @@ void printHelpScreen(){
  */
 int runScript(char * wordArray[], mem_t * shellMemory[], int shellMemoryMaxSize, int maxInputSize){
     char * fileName = wordArray[1];
-    int lengthOfInput = getLengthOfInput(wordArray, shellMemoryMaxSize);
+    int lengthOfInput = getLengthOfInput(wordArray);
     if(lengthOfInput < 2){
         return MALFORMED_COMMAND;
     }
@@ -313,6 +319,52 @@ int runScript(char * wordArray[], mem_t * shellMemory[], int shellMemoryMaxSize,
     return status;
 }
 
+/*
+ * Function: execCommand
+ * -----------------------------------------------------------------------
+ *  Function used to run the specified scripts concurrently. Maximum of
+ *  3 scripts, must all be unique (no duplicates)
+ * 
+ *  Returns: 1 on success, -1 on nonexistent file, 0 error;
+ */
+int exec(char * wordArray[], mem_t * shellMemory[], int shellMemoryMaxSize, int maxInputSize){
+    
+    // Input validation
+    int inputLength = getLengthOfInput(wordArray);
+
+    if(inputLength > 4 || inputLength < 2){
+        return MALFORMED_COMMAND;
+    }
+    
+    bool sameCommands = false;
+    switch (inputLength)
+    {
+    case 3:
+        sameCommands = (bool) isEqual(wordArray[1], wordArray[2]);
+        break;
+    case 4:
+        sameCommands = (bool) isEqual(wordArray[1], wordArray[2]) || (bool) isEqual(wordArray[1], wordArray[3]) || (bool) isEqual(wordArray[2], wordArray[3]);
+        break;
+    default:
+        return FATAL_ERROR;
+    }
+    if(sameCommands){
+        printf("Error: Script <name> already loaded.\n");
+        return MALFORMED_COMMAND;
+    }
+    
+    // TODO: The actual interesting stuff lol
+    
+    return FATAL_ERROR;
+}
+
+/*
+ * Function: wipeWords 
+ * -----------------------------------------------------------------------
+ *  Function used to wipe the global words array.
+ * 
+ *  Returns: void
+ */
 void wipeWords(char * wordArray[], int arrayLength){
     for(int w = 0; w < arrayLength; w++){
         wordArray[w] = strdup("\0");

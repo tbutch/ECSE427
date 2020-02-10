@@ -19,6 +19,10 @@ static const char quitCommand[] ="quit";
 static const char setCommand[] ="set";
 static const char printCommand[] ="print";
 static const char runCommand[] ="run";
+static const char execCommand[] ="exec";
+
+// Add exit command cus Its exit in every other shell lol
+static const char exitCommand[] ="exit";
 
 // Exit codes - Makes it clearer when returning an
 // code from a function 

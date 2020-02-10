@@ -18,4 +18,7 @@
 // variables can be stored in the shell memory.
 #define SHELL_MEMORY_SIZE 100
 
+// Main shell UI function
+int shellUI(int argc, char** argv);
+
 #endif
