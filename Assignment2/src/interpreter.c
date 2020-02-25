@@ -349,12 +349,16 @@ int exec(char * wordArray[], mem_t * shellMemory[], int shellMemoryMaxSize, int 
         return FATAL_ERROR;
     }
     if(sameCommands){
-        printf("Error: Script <name> already loaded.\n");
+        printf("Error: Script is already loaded. Purging memory.\n");
         return MALFORMED_COMMAND;
     }
     
     // TODO: The actual interesting stuff lol
-    
+    for(int i = 1; i < inputLength; i++){
+        // Load programs into RAM
+        // Create PCB for program
+        // Add PCB to ready queue
+    }
     return FATAL_ERROR;
 }
 
