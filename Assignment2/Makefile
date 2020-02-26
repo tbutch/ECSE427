@@ -35,7 +35,7 @@ $(programName): ./$(buildDir)/kernel.o ./$(buildDir)/shell.o ./$(buildDir)/inter
 	mv shellmemory.o ./$(buildDir)/
 
 # cpu.c plus any libraries
-./$(buildDir)/cpu.o: $(srcDir)/cpu.c $(incDir)/cpu.h
+./$(buildDir)/cpu.o: $(srcDir)/cpu.c $(incDir)/cpu.h $(incDir)/shell.h
 	$(CC) $(CFLAGS) $(srcDir)/cpu.c
 	mv cpu.o ./$(buildDir)/
 
