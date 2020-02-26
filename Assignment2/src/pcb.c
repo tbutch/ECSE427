@@ -4,48 +4,53 @@
 
 #include "../inc/pcb.h"
 
-// Private function prototypes
-bool disposeNode(PCB_Node_t *nodeToDispose);
+// Global ready list
+PCB_LinkedList * readyList;
 
 /*
- * Function: addPCBToReadyQueue
+ * Function: initPCB 
  * -----------------------------------------------------------------------
- *  Function used to add a node to the PCB ready queue.
+ *  Function used to malloc and initialize the PCB with the specified 
+ *  start and end variables
  * 
- *  Returns: true on success;
+ *  Returns: PCB_t pointer
  */
-bool enqueuePCB(PCB_LinkedList *list, PCB_Node_t *node) {
-    if (list == NULL || node == NULL) {
-        return false;
-    }
-    PCB_Node_t *currNode = list->head;
-    while (currNode != NULL) {
-        currNode = currNode->next;
-    }
-    currNode = node;
-    list->tail = node;
-    return true;
+PCB_t * initPCB(int start, int end){
+    PCB_t * pcb = malloc(sizeof(PCB_t));
+    pcb->PC=start;
+    pcb->start=start;
+    pcb->end=end;
+    return pcb;
 }
 
 /*
- * Function: clearReadyQueue
+ * Function: initPCBNode
  * -----------------------------------------------------------------------
- *  Function used to clear the PCB ready queue
+ *  Function used to init a new PCB_Node_t
  * 
- *  Returns: 1 on success, 0 error;
+ *  Returns: PCB_Node_t pointer
  */
-bool clearReadyQueue(PCB_LinkedList *list) {
-    if (list == NULL) {
+PCB_Node_t * initPCBNode(PCB_t * pcb){
+    PCB_Node_t * pcbNode = malloc(sizeof(PCB_Node_t));
+    pcbNode->pcb = pcb;
+    pcbNode->next = NULL;
+}
+
+/*
+ * Function: disposeNode
+ * -----------------------------------------------------------------------
+ *  Function used to dispose of PCB_Node_t as well as the PCB
+ * 
+ *  Returns: True on success
+ */
+bool disposePCBNode(PCB_Node_t *nodeToDispose) {
+    if (nodeToDispose == NULL) {
         return false;
     }
-    PCB_Node_t *node;
-    while (list->head != NULL) {
-        node = list->head;
-        list->head = list->head->next;
-        if (!disposeNode(node)) {
-            return false;
-        }
+    if(nodeToDispose->pcb != NULL){
+        free(nodeToDispose->pcb);
     }
+    free(nodeToDispose);
     return true;
 }
 
@@ -56,28 +61,81 @@ bool clearReadyQueue(PCB_LinkedList *list) {
  * 
  *  Returns: true on success;
  */
-bool initPCBReadyQueue(PCB_LinkedList *list) {
-    if (list == NULL) {
+PCB_LinkedList * initPCBReadyQueue() {
+    readyList = malloc(sizeof(PCB_LinkedList));
+    readyList->head = NULL;
+    readyList->tail = NULL;
+    return readyList;
+}
+
+/*
+ * Function: getPCBReadyQueue
+ * -----------------------------------------------------------------------
+ *  Function used to obtain the PCB Ready queue pointer
+ * 
+ *  Returns: pointer to the ready list;
+ */
+PCB_LinkedList * getPCBReadyQueue(){
+    return readyList;
+}
+
+/*
+ * Function: clearReadyQueue
+ * -----------------------------------------------------------------------
+ *  Function used to clear the PCB ready queue
+ * 
+ *  Returns: 1 on success, 0 error;
+ */
+bool clearReadyQueue() {
+    if (readyList == NULL) {
         return false;
     }
-    list->head = NULL;
-    list->tail = NULL;
+    PCB_Node_t *node;
+    while (readyList->head != NULL) {
+        node = readyList->head;
+        readyList->head = readyList->head->next;
+        if (!disposePCBNode(node)) {
+            return false;
+        }
+    }
+    readyList->head = NULL;
+    readyList->tail = NULL;
     return true;
 }
 
 /*
- * Function: disposeNode
+ * Function: disposePCBReadyQueue
  * -----------------------------------------------------------------------
- *  Function used to dispose of PCB_Node_t
+ *  Function used to dispose the PCB Ready queue. Calls clearReadyQueue
+ *  before freeing the pointer
  * 
- *  Returns: True on success
+ *  Returns: true on success;
  */
-bool disposeNode(PCB_Node_t *nodeToDispose) {
-    if (nodeToDispose == NULL) {
+bool disposePCBReadyQueue() {
+    clearReadyQueue();
+    free(readyList);
+}
+
+/*
+ * Function: addPCBToReadyQueue
+ * -----------------------------------------------------------------------
+ *  Function used to add a node to the PCB ready queue.
+ * 
+ *  Returns: true on success;
+ */
+bool enqueuePCB(PCB_t * pcb) {
+    if (readyList == NULL || pcb == NULL) {
         return false;
     }
-    free(nodeToDispose->pcb);
-    free(nodeToDispose);
+    
+    PCB_Node_t * nodeToAdd = initPCBNode(pcb);
+    if(readyList->tail == NULL){
+        readyList->head = nodeToAdd;
+        readyList->tail = nodeToAdd;
+        return true;
+    }
+    readyList->tail->next = nodeToAdd;
+    readyList->tail = nodeToAdd;
     return true;
 }
 
@@ -86,9 +144,20 @@ bool disposeNode(PCB_Node_t *nodeToDispose) {
  * -----------------------------------------------------------------------
  *  Function used to remove first item from the ready queue
  * 
- *  Returns: void
+ *  Returns: PCB_Node_t pointer
  */
-PCB_Node_t * dequeuePCB(PCB_LinkedList * list){
-    PCB_Node_t * nodeToReturn = list->head;
-    list->head=list->head->next;
+PCB_Node_t * dequeuePCB(){
+    if(readyList == NULL || readyList->head == NULL){
+        return NULL;
+    }
+
+    PCB_Node_t * nodeToReturn = readyList->head;
+    readyList->head = readyList->head->next;
+
+    // If we have dequeued the last node in the queue, set the tail to null
+    if(readyList->head == NULL){
+        readyList->tail = NULL;
+    }
+    return nodeToReturn;
 }
+
