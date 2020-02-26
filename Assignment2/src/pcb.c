@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "..\inc\pcb.h"
+#include "../inc/pcb.h"
 
 // Private function prototypes
 bool disposeNode(PCB_Node_t *nodeToDispose);

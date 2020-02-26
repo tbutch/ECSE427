@@ -35,6 +35,5 @@ static const int QUIT_TERMINAL = 4;
 
 // Public functions
 int parseAndEvaluate(char input[], mem_t * shellMemory[], int shellMemoryMaxSize, int maxInputSize);
-int isEqual(char str1[], char str2[]);
 
 #endif

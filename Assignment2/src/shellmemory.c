@@ -15,6 +15,7 @@
 // File includes
 #include "../inc/shellmemory.h"
 #include "../inc/interpreter.h"
+#include "../inc/stringUtilities.h"
 
 // Function prototypes 
 int addMemoryNodeToShellMemAtIndex(mem_t * shellMemory[], int maxMemSize, char * wordsArray[], int index, int lengthOfInput);

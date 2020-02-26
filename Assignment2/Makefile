@@ -16,8 +16,8 @@ endif
 
 all: $(programName)
 
-$(programName): ./$(buildDir)/kernel.o ./$(buildDir)/shell.o ./$(buildDir)/interpreter.o ./$(buildDir)/shellmemory.o ./$(buildDir)/ram.o ./$(buildDir)/pcb.o
-	$(CC) -o $(programName) ./$(buildDir)/kernel.o ./$(buildDir)/shell.o ./$(buildDir)/interpreter.o ./$(buildDir)/shellmemory.o ./$(buildDir)/ram.o ./$(buildDir)/pcb.o
+$(programName): ./$(buildDir)/kernel.o ./$(buildDir)/shell.o ./$(buildDir)/interpreter.o ./$(buildDir)/shellmemory.o ./$(buildDir)/ram.o ./$(buildDir)/pcb.o ./$(buildDir)/stringUtilities.o
+	$(CC) -o $(programName) ./$(buildDir)/kernel.o ./$(buildDir)/shell.o ./$(buildDir)/interpreter.o ./$(buildDir)/shellmemory.o ./$(buildDir)/ram.o ./$(buildDir)/pcb.o ./$(buildDir)/stringUtilities.o
 
 # Shell.c plus any libraries used to build shell.c
 ./$(buildDir)/shell.o: $(shellDependencies)
@@ -25,12 +25,12 @@ $(programName): ./$(buildDir)/kernel.o ./$(buildDir)/shell.o ./$(buildDir)/inter
 	mv shell.o ./$(buildDir)/
 
 # interpreter.c plus any libraries
-./$(buildDir)/interpreter.o: $(srcDir)/interpreter.c $(incDir)/interpreter.h $(incDir)/shell.h
+./$(buildDir)/interpreter.o: $(srcDir)/interpreter.c $(incDir)/interpreter.h $(srcDir)/stringUtilities.c $(incDir)/stringUtilities.h
 	$(CC) $(CFLAGS) $(srcDir)/interpreter.c
 	mv interpreter.o ./$(buildDir)/
 
 # interpreter.c plus any libraries
-./$(buildDir)/shellmemory.o: $(srcDir)/shellmemory.c $(incDir)/shellmemory.h 
+./$(buildDir)/shellmemory.o: $(srcDir)/shellmemory.c $(incDir)/shellmemory.h  $(srcDir)/stringUtilities.c $(incDir)/stringUtilities.h
 	$(CC) $(CFLAGS) $(srcDir)/shellmemory.c
 	mv shellmemory.o ./$(buildDir)/
 
@@ -53,6 +53,10 @@ $(programName): ./$(buildDir)/kernel.o ./$(buildDir)/shell.o ./$(buildDir)/inter
 ./$(buildDir)/ram.o: $(srcDir)/ram.c $(incDir)/ram.h
 	$(CC) $(CFLAGS) $(srcDir)/ram.c
 	mv ram.o ./$(buildDir)/
+
+./$(buildDir)/stringUtilities.o: $(srcDir)/stringUtilities.c $(incDir)/stringUtilities.h
+	$(CC) $(CFLAGS) $(srcDir)/stringUtilities.c
+	mv stringUtilities.o ./$(buildDir)/
 
 .PHONY: clean
 clean:

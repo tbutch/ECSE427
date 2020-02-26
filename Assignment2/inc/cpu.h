@@ -1,7 +1,7 @@
 #ifndef CPU
 #define CPU
 
-#include "../inc/shell.h";
+#include "../inc/shell.h"
 
 typedef struct{
     int IP;

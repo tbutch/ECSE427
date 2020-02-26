@@ -17,9 +17,12 @@
 // File includes
 #include "../inc/interpreter.h"
 #include "../inc/shell.h"
+#include "../inc/ram.h"
+#include "../inc/pcb.h"
+#include "../inc/cpu.h"
+#include "../inc/stringUtilities.h"
 
 // Function prototypes
-int isEqual(char str1[], char str2[]);
 void unknownCommand();
 int getLengthOfInput(char * wordsArray[]);
 int setVariableToShellMemory(char * wordsArray[], mem_t * shellMemory[], int shellMemoryMaxSize);
@@ -164,21 +167,6 @@ int parseInput(char * wordArray[], mem_t * shellMemory[], int shellMemoryMaxSize
         }
     }
     return SUCCESS;
-}
-
-/*
- * Function: isEqual
- * -----------------------------------------------------------------------
- *  Function used to compare two strings more inuitivel
- * 
- *  Returns: 1 if equal, 0 if not
- */
-int isEqual(char str1[], char str2[]){
-    if( strcmp(str1,str2)==0 ){
-        return 1;
-    } else {
-        return 0;
-    }
 }
 
 /*
@@ -353,11 +341,24 @@ int exec(char * wordArray[], mem_t * shellMemory[], int shellMemoryMaxSize, int 
         return MALFORMED_COMMAND;
     }
     
+    PCB_LinkedList * readyQueue = malloc(sizeof(PCB_LinkedList));
+
     // TODO: The actual interesting stuff lol
     for(int i = 1; i < inputLength; i++){
         // Load programs into RAM
+        FILE * file = fopen(wordArray[i], 'r');
+        int * programStart, programEnd;
+        addToRAM(file, programStart, programEnd);
+
         // Create PCB for program
+        PCB_t * programPCB = malloc(sizeof(PCB_t));
+        programPCB->PC=programStart;
+        programPCB->start=programStart;
+        programPCB->end=programEnd;
+
         // Add PCB to ready queue
+        PCB_Node_t * pcbNode = malloc(sizeof(PCB_Node_t));
+        pcbNode->pcb=programPCB;
     }
     return FATAL_ERROR;
 }
