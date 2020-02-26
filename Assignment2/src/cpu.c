@@ -17,3 +17,16 @@ int initCPU(CPU_t * cpu){
     cpu->IR[0] = '\0';
     return 1;
 }
+
+/*
+ * Function: run
+ * -----------------------------------------------------------------------
+ *  Function used to run programs for a given quanta.
+ * 
+ *  Returns: 1 on success, 0 error;
+ */
+run(int quanta){
+    for(int i = 0; i < quanta; i++){
+        // call interpreter.
+    }
+}

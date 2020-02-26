@@ -11,5 +11,6 @@ typedef struct{
 
 // Public function prototypes
 int initCPU(CPU_t * cpu);
+void run(int quanta);
 
 #endif
