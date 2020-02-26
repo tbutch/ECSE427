@@ -21,6 +21,7 @@
 #include "../inc/pcb.h"
 #include "../inc/cpu.h"
 #include "../inc/stringUtilities.h"
+#include "../inc/kernel.h"
 
 // Function prototypes
 void unknownCommand();
@@ -337,29 +338,16 @@ int exec(char * wordArray[], mem_t * shellMemory[], int shellMemoryMaxSize, int 
         return FATAL_ERROR;
     }
     if(sameCommands){
-        printf("Error: Script is already loaded. Purging memory.\n");
+        printf("Error: Script is already loaded.\n");
         return MALFORMED_COMMAND;
     }
     
-    PCB_LinkedList * readyQueue = malloc(sizeof(PCB_LinkedList));
+    PCB_LinkedList * readyQueue = initPCBReadyQueue();
 
-    // TODO: The actual interesting stuff lol
     for(int i = 1; i < inputLength; i++){
-        // Load programs into RAM
-        FILE * file = fopen(wordArray[i], 'r');
-        int * programStart, programEnd;
-        addToRAM(file, programStart, programEnd);
-
-        // Create PCB for program
-        PCB_t * programPCB = malloc(sizeof(PCB_t));
-        programPCB->PC=programStart;
-        programPCB->start=programStart;
-        programPCB->end=programEnd;
-
-        // Add PCB to ready queue
-        PCB_Node_t * pcbNode = malloc(sizeof(PCB_Node_t));
-        pcbNode->pcb=programPCB;
+        myInit(wordArray[i]);
     }
+
     return FATAL_ERROR;
 }
 

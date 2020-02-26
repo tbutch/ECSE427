@@ -9,6 +9,7 @@ typedef struct{
     int quanta;
 } CPU_t;
 
+// Public function prototypes
 int initCPU(CPU_t * cpu);
 
 #endif

@@ -1,5 +1,6 @@
 /**
- * Main program file of the Tristan Bouchard shell, which contains the main() function.
+ * Shell program file of the Tristan Bouchard shell, which contains the shellUI() function
+ * called by the kernel.
  * All assumtions taken when programming this assignment are available in the 
  * README.md file in the Assignment1 directory
  * 
