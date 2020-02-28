@@ -6,18 +6,30 @@ srcDir:=src
 buildDir:=build
 incDir:=inc
 
-kernelDependencies:=$(srcDir)/kernel.c $(incDir)/kernel.h $(srcDir)/shell.c $(incDir)/shell.h $(srcDir)/pcb.c $(incDir)/pcb.h $(srcDir)/ram.c $(incDir)/ram.h 
-shellDependencies:=$(srcDir)/shell.c $(srcDir)/interpreter.c $(srcDir)/shellmemory.c $(incDir)/shell.h $(incDir)/interpreter.h $(incDir)/shellmemory.h 
+kernelDependencies:=$(srcDir)/kernel.c $(incDir)/kernel.h $(srcDir)/shell.c $(incDir)/shell.h $(srcDir)/pcb.c $(incDir)/pcb.h \
+					$(srcDir)/ram.c $(incDir)/ram.h 
+shellDependencies:=$(srcDir)/shell.c $(srcDir)/interpreter.c $(srcDir)/shellmemory.c $(incDir)/shell.h $(incDir)/interpreter.h \
+				   $(incDir)/shellmemory.h 
+ramDependencies:=$(srcDir)/ram.c $(incDir)/ram.h $(srcDir)/shell.c $(incDir)/shell.h
+cpuDependencies:=$(srcDir)/cpu.c $(incDir)/cpu.h $(srcDir)/ram.c $(incDir)/ram.h $(srcDir)/interpreter.c $(incDir)/interpreter.h \
+				 $(srcDir)/shellmemory.c $(incDir)/shellmemory.h
+interpreterDependencies:=$(srcDir)/interpreter.c $(incDir)/interpreter.h $(srcDir)/shell.c $(incDir)/shell.h $(srcDir)/ram.c $(incDir)/ram.h \
+						 $(srcDir)/pcb.c $(incDir)/pcb.h $(srcDir)/cpu.c $(incDir)/cpu.h $(srcDir)/stringUtilities.c $(incDir)/stringUtilities.h \
+						 $(srcDir)/kernel.c $(incDir)/kernel.h
+pcbDependencies:=$(srcDir)/pcb.c $(incDir)/pcb.h
+shellmemoryDependencies:=$(srcDir)/shellmemory.c $(incDir)/shellmemory.h $(srcDir)/interpreter.c $(incDir)/interpreter.h \
+						 $(srcDir)/stringUtilities.c $(incDir)/stringUtilities.h
+stringUtilitiesDependencies:=$(srcDir)/stringUtilities.c $(incDir)/stringUtilities.h
 
 ifeq  ($(DEBUG), 1)
 	CFLAGS+= -ggdb3
-	programName=mysh_d
+	programName=mykernel_d
 endif
 
 all: $(programName)
 
-$(programName): ./$(buildDir)/kernel.o ./$(buildDir)/shell.o ./$(buildDir)/interpreter.o ./$(buildDir)/shellmemory.o ./$(buildDir)/ram.o ./$(buildDir)/pcb.o ./$(buildDir)/stringUtilities.o
-	$(CC) -o $(programName) ./$(buildDir)/kernel.o ./$(buildDir)/shell.o ./$(buildDir)/interpreter.o ./$(buildDir)/shellmemory.o ./$(buildDir)/ram.o ./$(buildDir)/pcb.o ./$(buildDir)/stringUtilities.o
+$(programName): ./$(buildDir)/kernel.o ./$(buildDir)/shell.o ./$(buildDir)/interpreter.o ./$(buildDir)/shellmemory.o ./$(buildDir)/ram.o ./$(buildDir)/pcb.o ./$(buildDir)/stringUtilities.o ./$(buildDir)/cpu.o
+	$(CC) -o $(programName) ./$(buildDir)/kernel.o ./$(buildDir)/shell.o ./$(buildDir)/interpreter.o ./$(buildDir)/shellmemory.o ./$(buildDir)/ram.o ./$(buildDir)/pcb.o ./$(buildDir)/stringUtilities.o ./$(buildDir)/cpu.o
 
 # Shell.c plus any libraries used to build shell.c
 ./$(buildDir)/shell.o: $(shellDependencies)
@@ -25,17 +37,17 @@ $(programName): ./$(buildDir)/kernel.o ./$(buildDir)/shell.o ./$(buildDir)/inter
 	mv shell.o ./$(buildDir)/
 
 # interpreter.c plus any libraries
-./$(buildDir)/interpreter.o: $(srcDir)/interpreter.c $(incDir)/interpreter.h $(srcDir)/stringUtilities.c $(incDir)/stringUtilities.h
+./$(buildDir)/interpreter.o: $(interpreterDependencies)
 	$(CC) $(CFLAGS) $(srcDir)/interpreter.c
 	mv interpreter.o ./$(buildDir)/
 
 # interpreter.c plus any libraries
-./$(buildDir)/shellmemory.o: $(srcDir)/shellmemory.c $(incDir)/shellmemory.h  $(srcDir)/stringUtilities.c $(incDir)/stringUtilities.h
+./$(buildDir)/shellmemory.o: $(shellmemoryDependencies)
 	$(CC) $(CFLAGS) $(srcDir)/shellmemory.c
 	mv shellmemory.o ./$(buildDir)/
 
 # cpu.c plus any libraries
-./$(buildDir)/cpu.o: $(srcDir)/cpu.c $(incDir)/cpu.h $(incDir)/shell.h
+./$(buildDir)/cpu.o: $(cpuDependencies)
 	$(CC) $(CFLAGS) $(srcDir)/cpu.c
 	mv cpu.o ./$(buildDir)/
 
@@ -45,19 +57,19 @@ $(programName): ./$(buildDir)/kernel.o ./$(buildDir)/shell.o ./$(buildDir)/inter
 	mv kernel.o ./$(buildDir)/
 
 # pcb.c plus any libraries
-./$(buildDir)/pcb.o: $(srcDir)/pcb.c $(incDir)/pcb.h
+./$(buildDir)/pcb.o: $(pcbDependencies)
 	$(CC) $(CFLAGS) $(srcDir)/pcb.c
 	mv pcb.o ./$(buildDir)/
 
 # ram.c plus any libraries
-./$(buildDir)/ram.o: $(srcDir)/ram.c $(incDir)/ram.h
+./$(buildDir)/ram.o: $(ramDependencies)
 	$(CC) $(CFLAGS) $(srcDir)/ram.c
 	mv ram.o ./$(buildDir)/
 
-./$(buildDir)/stringUtilities.o: $(srcDir)/stringUtilities.c $(incDir)/stringUtilities.h
+./$(buildDir)/stringUtilities.o: $(stringUtilitiesDependencies)
 	$(CC) $(CFLAGS) $(srcDir)/stringUtilities.c
 	mv stringUtilities.o ./$(buildDir)/
 
 .PHONY: clean
 clean:
-	rm -f *.exe ./build/*.o mysh
+	rm -f *.exe ./build/*.o mysh mysh_d mykernel mykernel_d

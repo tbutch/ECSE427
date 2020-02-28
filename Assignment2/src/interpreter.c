@@ -11,7 +11,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
 #include <stdbool.h>
 
 // File includes
@@ -154,17 +153,31 @@ int parseInput(char * wordArray[], mem_t * shellMemory[], int shellMemoryMaxSize
         // Verify the errorCode if not already handled by the command
         if(errorCode == MALFORMED_COMMAND){
             // Malformed command
+            printf("\033[0;31m");
             printf("Malformed %s command\n", wordArray[0]);
+            printf("\033[0m");
             return MALFORMED_COMMAND;
         } else if(errorCode == FAILURE){
             // some sort of error
         } else if (errorCode == SUCCESS){
             // All good!
+            return SUCCESS;
         } else if(errorCode == QUIT_TERMINAL) {
             // This section is used when running scripts
             printf("Bye!\n");
         } else if(errorCode == FATAL_ERROR){
+            printf("\033[0;31m");
             printf("Fatal error occured in %s command\n", wordArray[0]);
+            printf("\033[0m");
+        } else if(errorCode == NONEXISTANT_FILE){
+            printf("\033[0;31m");
+            printf("File nonexistent. Simulation aborted\n");
+            printf("\033[0m");
+        } else if(errorCode == RAM_LOAD_FAIL){
+            // Print in red
+            printf("\033[0;31m"); 
+            printf("Failure to load in RAM. Programs may be too long for memory.\nSimulation aborted\n");
+            printf("\033[0m");
         }
     }
     return SUCCESS;
@@ -240,8 +253,7 @@ int printShellVariable(char * wordsArray[], mem_t * shellMemory[], int shellMemo
     int variableIndex = getVariablePositionInMemoryArray(shellMemory, wordsArray[1], shellMemoryMaxSize);
     if(variableIndex == -1){
         // Variable does not exist
-        printf("Variable does not exist\n");
-        return SUCCESS;
+        printf("Variable does not exist!\n");
     }
     printf("%s\n", shellMemory[variableIndex]->value);
     return SUCCESS;
@@ -317,17 +329,17 @@ int runScript(char * wordArray[], mem_t * shellMemory[], int shellMemoryMaxSize,
  *  Returns: 1 on success, -1 on nonexistent file, 0 error;
  */
 int exec(char * wordArray[], mem_t * shellMemory[], int shellMemoryMaxSize, int maxInputSize){
-    
     // Input validation
     int inputLength = getLengthOfInput(wordArray);
 
     if(inputLength > 4 || inputLength < 2){
         return MALFORMED_COMMAND;
     }
-    
     bool sameCommands = false;
     switch (inputLength)
     {
+    case 2:
+        sameCommands = false;
     case 3:
         sameCommands = (bool) isEqual(wordArray[1], wordArray[2]);
         break;
@@ -341,14 +353,16 @@ int exec(char * wordArray[], mem_t * shellMemory[], int shellMemoryMaxSize, int 
         printf("Error: Script is already loaded.\n");
         return MALFORMED_COMMAND;
     }
-    
-    PCB_LinkedList * readyQueue = initPCBReadyQueue();
 
     for(int i = 1; i < inputLength; i++){
-        myInit(wordArray[i]);
-    }
+        int status = myInit(wordArray[i]);
 
-    return FATAL_ERROR;
+        if(status == NONEXISTANT_FILE || status == RAM_LOAD_FAIL){
+            cleanRam();
+            return status;
+        }
+    }
+    return scheduler(shellMemory, shellMemoryMaxSize, maxInputSize);
 }
 
 /*

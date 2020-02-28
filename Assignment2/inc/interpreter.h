@@ -32,6 +32,8 @@ static const int SUCCESS = 1;
 static const int UNKOWN_COMMAND = 2;
 static const int MALFORMED_COMMAND = 3;
 static const int QUIT_TERMINAL = 4;
+static const int NONEXISTANT_FILE = 5;
+static const int RAM_LOAD_FAIL = 6;
 
 // Public functions
 int parseAndEvaluate(char input[], mem_t * shellMemory[], int shellMemoryMaxSize, int maxInputSize);

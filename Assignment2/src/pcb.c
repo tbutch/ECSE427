@@ -37,6 +37,21 @@ PCB_Node_t * initPCBNode(PCB_t * pcb){
 }
 
 /*
+ * Function: disposePCB
+ * -----------------------------------------------------------------------
+ *  Function used to dispose of PCB
+ * 
+ *  Returns: boolean on status of success
+ */
+bool disposePCB(PCB_t * pcb){
+    if(pcb == NULL){
+       return false; 
+    }
+    free(pcb);
+    return true;
+}
+
+/*
  * Function: disposeNode
  * -----------------------------------------------------------------------
  *  Function used to dispose of PCB_Node_t as well as the PCB
@@ -127,15 +142,15 @@ bool enqueuePCB(PCB_t * pcb) {
     if (readyList == NULL || pcb == NULL) {
         return false;
     }
-    
     PCB_Node_t * nodeToAdd = initPCBNode(pcb);
     if(readyList->tail == NULL){
         readyList->head = nodeToAdd;
         readyList->tail = nodeToAdd;
         return true;
+    } else {
+        readyList->tail->next = nodeToAdd;
+        readyList->tail = nodeToAdd;
     }
-    readyList->tail->next = nodeToAdd;
-    readyList->tail = nodeToAdd;
     return true;
 }
 
@@ -146,7 +161,7 @@ bool enqueuePCB(PCB_t * pcb) {
  * 
  *  Returns: PCB_Node_t pointer
  */
-PCB_Node_t * dequeuePCB(){
+PCB_t * dequeuePCB(){
     if(readyList == NULL || readyList->head == NULL){
         return NULL;
     }
@@ -155,9 +170,29 @@ PCB_Node_t * dequeuePCB(){
     readyList->head = readyList->head->next;
 
     // If we have dequeued the last node in the queue, set the tail to null
-    if(readyList->head == NULL){
+    if(readyList->head == readyList->tail){
+        readyList->head = NULL;
         readyList->tail = NULL;
     }
-    return nodeToReturn;
+    PCB_t * pcb_to_return = nodeToReturn->pcb;
+    free(nodeToReturn);
+    return pcb_to_return;
+}
+
+/*
+ * Function: getPCBQueueLength 
+ * -----------------------------------------------------------------------
+ *  Function used to obtain the length of the PCB ready queue
+ * 
+ *  Returns: Length of linked list as an integer
+ */
+int getPCBQueueLength(){
+    int length = 0;
+    PCB_Node_t * node = readyList->head;
+    while(node != NULL){
+        length++;
+        node = node->next;
+    }
+    return length;
 }
 

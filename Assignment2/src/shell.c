@@ -6,7 +6,7 @@
  * 
  * Author: Tristan Bouchard
  * Date: January 29 2020
- * 
+ *      
  */
 
 #include <stdio.h>
@@ -48,6 +48,12 @@ int shellUI(int argc, char** argv){
     while(1) {
         printf("%s", prompt);
         fgets(userInput, USER_LINE_INPUT_SIZE -1, stdin);
+        // This handles the problems with no quit at the end of a file
+        // size_t linecap = USER_LINE_INPUT_SIZE;
+        // char * line = NULL;
+        // if(getline(&line, &linecap -1, stdin) == -1){
+        //     break;
+        // }
 
         status = parseAndEvaluate(userInput, shellMemory, SHELL_MEMORY_SIZE, USER_LINE_INPUT_SIZE);
         

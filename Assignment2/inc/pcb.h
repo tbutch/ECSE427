@@ -21,11 +21,13 @@ typedef struct{
 
 // Public function prototypes
 PCB_t * initPCB(int start, int end);
+bool disposePCB(PCB_t * pcb);
 PCB_LinkedList * initPCBReadyQueue();
 PCB_LinkedList * getPCBReadyQueue();
 bool clearReadyQueue();
 bool disposePCBReadyQueue();
 bool enqueuePCB(PCB_t * pcb);
-PCB_Node_t * dequeuePCB();
+PCB_t * dequeuePCB();
+int getPCBQueueLength();
 
 #endif
