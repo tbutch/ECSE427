@@ -79,7 +79,7 @@ int scheduler(mem_t * shellMemory[], int shellMemoryMaxSize, int maxInputSize){
             }
             cpu->IP = pcb->PC;
             // c. It calls the run(quanta) function within cpu.c to run the script by copying quanta lines of code from ram[] using IP into the IR, which then calls: interpreter(IR)
-            int quantaToRun = (pcb->end - pcb->PC + 1 > BASE_QUANTA) ? BASE_QUANTA : pcb->end - pcb->start + 1;
+            int quantaToRun = (pcb->end - pcb->PC + 1 > BASE_QUANTA) ? BASE_QUANTA : pcb->end - pcb->PC + 1;
             int newPC = run(quantaToRun, shellMemory, shellMemoryMaxSize, maxInputSize);
             pcb->PC = newPC;
             if(pcb->PC > pcb->end){

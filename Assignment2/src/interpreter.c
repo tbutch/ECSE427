@@ -153,9 +153,7 @@ int parseInput(char * wordArray[], mem_t * shellMemory[], int shellMemoryMaxSize
         // Verify the errorCode if not already handled by the command
         if(errorCode == MALFORMED_COMMAND){
             // Malformed command
-            printf("\033[0;31m");
             printf("Malformed %s command\n", wordArray[0]);
-            printf("\033[0m");
             return MALFORMED_COMMAND;
         } else if(errorCode == FAILURE){
             // some sort of error
@@ -166,18 +164,11 @@ int parseInput(char * wordArray[], mem_t * shellMemory[], int shellMemoryMaxSize
             // This section is used when running scripts
             printf("Bye!\n");
         } else if(errorCode == FATAL_ERROR){
-            printf("\033[0;31m");
             printf("Fatal error occured in %s command\n", wordArray[0]);
-            printf("\033[0m");
         } else if(errorCode == NONEXISTANT_FILE){
-            printf("\033[0;31m");
             printf("File nonexistent. Simulation aborted\n");
-            printf("\033[0m");
         } else if(errorCode == RAM_LOAD_FAIL){
-            // Print in red
-            printf("\033[0;31m"); 
             printf("Failure to load in RAM. Programs may be too long for memory.\nSimulation aborted\n");
-            printf("\033[0m");
         }
     }
     return SUCCESS;
@@ -254,6 +245,7 @@ int printShellVariable(char * wordsArray[], mem_t * shellMemory[], int shellMemo
     if(variableIndex == -1){
         // Variable does not exist
         printf("Variable does not exist!\n");
+        return(SUCCESS);
     }
     printf("%s\n", shellMemory[variableIndex]->value);
     return SUCCESS;

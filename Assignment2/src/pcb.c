@@ -143,7 +143,7 @@ bool enqueuePCB(PCB_t * pcb) {
         return false;
     }
     PCB_Node_t * nodeToAdd = initPCBNode(pcb);
-    if(readyList->tail == NULL){
+    if(readyList->tail == NULL || readyList->head == NULL){
         readyList->head = nodeToAdd;
         readyList->tail = nodeToAdd;
         return true;
@@ -165,13 +165,11 @@ PCB_t * dequeuePCB(){
     if(readyList == NULL || readyList->head == NULL){
         return NULL;
     }
-
+    
     PCB_Node_t * nodeToReturn = readyList->head;
     readyList->head = readyList->head->next;
-
     // If we have dequeued the last node in the queue, set the tail to null
-    if(readyList->head == readyList->tail){
-        readyList->head = NULL;
+    if(readyList->head == NULL){
         readyList->tail = NULL;
     }
     PCB_t * pcb_to_return = nodeToReturn->pcb;
