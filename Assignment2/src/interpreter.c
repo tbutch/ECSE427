@@ -270,7 +270,9 @@ void printHelpScreen(){
     printf("\t       Example command: print mary\n\n");
     printf("\trun:   Command used to run specified text file script with supported commands.\n");
     printf("\t       Command format: run SCRIPT.txt\n\n");
-
+    printf("\texec:  Command used to run specified scripts in a parallel CPU simulation.\n");
+    printf("\t       Command format: exec SCRIPT1.txt [SCRIPT2.txt] [SCRIPT3.txt]\n\n");
+    
     printf("More supported commands to come!\n");
 }
 
