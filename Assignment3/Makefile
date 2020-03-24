@@ -10,7 +10,7 @@ kernelDependencies:=$(srcDir)/kernel.c $(incDir)/kernel.h $(srcDir)/shell.c $(in
 					$(srcDir)/ram.c $(incDir)/ram.h 
 shellDependencies:=$(srcDir)/shell.c $(srcDir)/interpreter.c $(srcDir)/shellmemory.c $(incDir)/shell.h $(incDir)/interpreter.h \
 				   $(incDir)/shellmemory.h 
-ramDependencies:=$(srcDir)/ram.c $(incDir)/ram.h $(srcDir)/shell.c $(incDir)/shell.h
+ramDependencies:=$(srcDir)/ram.c $(incDir)/ram.h $(srcDir)/shell.c $(incDir)/shell.h $(srcDir)/stringUtilities.c $(incDir)/stringUtilities.h
 cpuDependencies:=$(srcDir)/cpu.c $(incDir)/cpu.h $(srcDir)/ram.c $(incDir)/ram.h $(srcDir)/interpreter.c $(incDir)/interpreter.h \
 				 $(srcDir)/shellmemory.c $(incDir)/shellmemory.h
 interpreterDependencies:=$(srcDir)/interpreter.c $(incDir)/interpreter.h $(srcDir)/shell.c $(incDir)/shell.h $(srcDir)/ram.c $(incDir)/ram.h \

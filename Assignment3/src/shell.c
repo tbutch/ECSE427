@@ -48,16 +48,12 @@ int shellUI(int argc, char** argv){
     printWelcomeText();
     while(1) {
         printf("%s", prompt);
+        
+        // This if statement handles EOF.
         if(fgets(userInput, USER_LINE_INPUT_SIZE -1, stdin) == NULL){
             break;
         }
-        // This handles the problems with no quit at the end of a file
-        // size_t linecap = USER_LINE_INPUT_SIZE;
-        // char * line = NULL;
-        // if(getline(&line, &linecap -1, stdin) == -1){
-        //     break;
-        // }
-        // free(line);
+
         status = parseAndEvaluate(userInput, shellMemory, SHELL_MEMORY_SIZE, USER_LINE_INPUT_SIZE);
         
         if(status == SUCCESS || status == MALFORMED_COMMAND){

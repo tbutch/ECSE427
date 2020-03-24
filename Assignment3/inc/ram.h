@@ -1,7 +1,7 @@
 #ifndef RAM
 #define RAM
 
-#define RAMSIZE 1000
+#define RAMSIZE 10
 // Ram memory;
 #include <stdbool.h>
 

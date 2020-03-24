@@ -5,6 +5,7 @@
 // File includes
 #include "../inc/ram.h"
 #include "../inc/shell.h"
+#include "../inc/stringUtilities.h"
 
 /*
  * Function: addToRAM
@@ -26,6 +27,10 @@ bool addToRAM(FILE *p, int *start, int *end){
     char buffer[USER_LINE_INPUT_SIZE];
     // fgets(userInput, USER_LINE_INPUT_SIZE -1, stdin)
     while(fgets(buffer, USER_LINE_INPUT_SIZE, p)){
+        // ignore newlines
+        if(isEqual(buffer,"\n")){
+            continue;
+        }
         if(nextLine == RAMSIZE){
             // RAM full, but program not completely copied!
             return false;

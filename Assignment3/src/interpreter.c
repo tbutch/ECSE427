@@ -56,7 +56,7 @@ int parseAndEvaluate(char input[], mem_t * shellMemory[], int shellMemoryMaxSize
     wipeWords(wordArray, shellMemoryMaxSize);
     
     // Parse input string while not null
-    while(input[i] != '\0'){
+    while(true){
         char currentChar = input[i];
 
         // If the currentChar is not a space, add it to the 
@@ -75,14 +75,21 @@ int parseAndEvaluate(char input[], mem_t * shellMemory[], int shellMemoryMaxSize
             }
             
         } 
-        // if end of string
-        else if(currentChar == '\n'){
+        // if end of string, with or without newline!
+        else if(currentChar == '\n' || currentChar == '\0'){
             currWord[currWordLength] = '\0';
             wordArray[wordCount] = strdup(currWord);
             strcpy(currWord,"");
             wordCount++;
             break;
         }
+        // else if(currentChar == '\0'){
+        //     currWord[currWordLength] = '\0';
+        //     wordArray[wordCount] = strdup(currWord);
+        //     strcpy(currWord,"");
+        //     wordCount++;
+        //     break;
+        // }
         else {
             // Add the current character to the current work and increment the length
             // of the current word
@@ -128,21 +135,21 @@ int parseInput(char * wordArray[], mem_t * shellMemory[], int shellMemoryMaxSize
 
         // Compare
         // Here, we cast to (char *) because cont char *  != char *
-        if(isEqual(wordArray[0], (char *) helpCommand)){
+        if(isEqual(wordArray[0], (char *) HELP_COMMAND)){
             printHelpScreen();
         }
-        else if(isEqual(wordArray[0], (char *) quitCommand) || isEqual(wordArray[0], (char *) exitCommand)){
+        else if(isEqual(wordArray[0], (char *) QUIT_COMMAND) || isEqual(wordArray[0], (char *) EXIT_COMMAND)){
             return QUIT_TERMINAL;
         }
-        else if(isEqual(wordArray[0], (char *) setCommand)){
+        else if(isEqual(wordArray[0], (char *) SET_COMMAND)){
             errorCode = setVariableToShellMemory(wordArray, shellMemory, shellMemoryMaxSize);
         }
-        else if(isEqual(wordArray[0], (char *) printCommand)){
+        else if(isEqual(wordArray[0], (char *) PRINT_COMMAND)){
             errorCode = printShellVariable(wordArray, shellMemory, shellMemoryMaxSize);
         }
-        else if(isEqual(wordArray[0], (char *) runCommand)){
+        else if(isEqual(wordArray[0], (char *) RUN_COMMAND)){
             errorCode = runScript(wordArray, shellMemory, shellMemoryMaxSize, maxInputSize);
-        } else if(isEqual(wordArray[0], (char *) execCommand)){
+        } else if(isEqual(wordArray[0], (char *) EXEC_COMMAND)){
             errorCode = exec(wordArray, shellMemory, shellMemoryMaxSize, maxInputSize);
         }
         else {
@@ -154,6 +161,9 @@ int parseInput(char * wordArray[], mem_t * shellMemory[], int shellMemoryMaxSize
         if(errorCode == MALFORMED_COMMAND){
             // Malformed command
             printf("Malformed %s command\n", wordArray[0]);
+            if(isEqual(wordArray[0], (char *) SET_COMMAND)){
+                printf("Command was: %s %s %s", wordArray[0], wordArray[1], wordArray[2]);
+            }
             return MALFORMED_COMMAND;
         } else if(errorCode == FAILURE){
             // some sort of error

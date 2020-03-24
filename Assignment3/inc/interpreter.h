@@ -14,15 +14,15 @@
 #include "../inc/shellmemory.h"
 
 // Constant string definitions for command matching
-static const char helpCommand[] ="help";
-static const char quitCommand[] ="quit";
-static const char setCommand[] ="set";
-static const char printCommand[] ="print";
-static const char runCommand[] ="run";
-static const char execCommand[] ="exec";
+static const char HELP_COMMAND[] ="help";
+static const char QUIT_COMMAND[] ="quit";
+static const char SET_COMMAND[] ="set";
+static const char PRINT_COMMAND[] ="print";
+static const char RUN_COMMAND[] ="run";
+static const char EXEC_COMMAND[] ="exec";
 
 // Add exit command cus Its exit in every other shell lol
-static const char exitCommand[] ="exit";
+static const char EXIT_COMMAND[] ="exit";
 
 // Exit codes - Makes it clearer when returning an
 // code from a function 
