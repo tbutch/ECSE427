@@ -1,0 +1,8 @@
+*.o
+*.exe
+*.out
+./build/
+*.sh
+*.txt
+mysh
+mykernel
