@@ -45,7 +45,7 @@ int myInit(char* fileName){
     if(!addToRAM(file, programStart, programEnd)){
         return RAM_LOAD_FAIL;
     }
-
+    fclose(file);
     // Create PCB for program
     PCB_t * programPCB = initPCB(*programStart, *programEnd);
     free(programStart);
