@@ -8,6 +8,9 @@
 #include "../inc/interpreter.h"
 #include "../inc/cpu.h"
 
+// Function prototypes
+void boot();
+
 /*
  * Function: main
  * -----------------------------------------------------------------------
@@ -16,15 +19,42 @@
  *  Returns: 0 if successful, 1 if not.
  */
 int main(int argc, char ** argv){
+    boot();
+    return shellUI(argc, argv);
+}
 
+/*
+ * Function: boot
+ * -----------------------------------------------------------------------
+ *  Function used to prepare shell environment.
+ * 
+ *  Returns: 0 if successful, 1 if not.
+ */
+void boot(){
     // Init PCB list, RAM, CPU 
     initPCBReadyQueue();
     initRam();
     initCPU();
-
-    return shellUI(argc, argv);
+    prepareBackingStore();
 }
 
+/*
+ * Function: prepareBackingStore
+ * -----------------------------------------------------------------------
+ *  Function used to prepare exec backing store.
+ * 
+ *  Returns: 0 if successful, 1 if not.
+ */
+void prepareBackingStore(){
+    /*
+    This means that it clears the Backing Store. 
+    It makes sure there is nothing in the Backing Store. A Backing Store is a partition of the hard disk.
+    For us, this will be simulated by a directory. Use the C system() command to delete the old 
+    backing store directory and then create a new directory. Name the directory BackingStore.
+    Note that the directory is only deleted when you run your kernel.
+    This means, when you exit your kernel the directory will still be present for the TA to look at.
+    */
+}
 /*
  * Function: myInit
  * -----------------------------------------------------------------------

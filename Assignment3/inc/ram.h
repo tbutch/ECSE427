@@ -1,10 +1,15 @@
 #ifndef RAM
 #define RAM
 
-#define RAMSIZE 10
+// Total number of frames in RAM
+#define NUMBER_OF_FRAMES 10
+// Number of strings contained by a RAM frame
+#define FRAME_SIZE 4
+#define RAMSIZE (NUMBER_OF_FRAMES * FRAME_SIZE)
 // Ram memory;
 #include <stdbool.h>
 
+// RAM is 
 char * ram[RAMSIZE];
 
 // public API

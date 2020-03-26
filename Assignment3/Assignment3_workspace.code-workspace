@@ -7,7 +7,8 @@
 	"settings": {
 		"files.associations": {
             "stdio.h": "c",
-            "shellmemory.h": "c"
+            "shellmemory.h": "c",
+            "stdbool.h": "c"
         }
 	}
 }

@@ -20,6 +20,7 @@ pcbDependencies:=$(srcDir)/pcb.c $(incDir)/pcb.h
 shellmemoryDependencies:=$(srcDir)/shellmemory.c $(incDir)/shellmemory.h $(srcDir)/interpreter.c $(incDir)/interpreter.h \
 						 $(srcDir)/stringUtilities.c $(incDir)/stringUtilities.h
 stringUtilitiesDependencies:=$(srcDir)/stringUtilities.c $(incDir)/stringUtilities.h
+memoryManagerDependencies:=$(srcDir)/memorymanager.c $(incDir)/memorymanager.h $(srcDir)/pcb.c $(incDir)/pcb.h
 
 ifeq  ($(DEBUG), 1)
 	CFLAGS+= -ggdb3
@@ -28,8 +29,8 @@ endif
 
 all: $(programName)
 
-$(programName): ./$(buildDir)/kernel.o ./$(buildDir)/shell.o ./$(buildDir)/interpreter.o ./$(buildDir)/shellmemory.o ./$(buildDir)/ram.o ./$(buildDir)/pcb.o ./$(buildDir)/stringUtilities.o ./$(buildDir)/cpu.o
-	$(CC) -o $(programName) ./$(buildDir)/kernel.o ./$(buildDir)/shell.o ./$(buildDir)/interpreter.o ./$(buildDir)/shellmemory.o ./$(buildDir)/ram.o ./$(buildDir)/pcb.o ./$(buildDir)/stringUtilities.o ./$(buildDir)/cpu.o
+$(programName): ./$(buildDir)/kernel.o ./$(buildDir)/shell.o ./$(buildDir)/interpreter.o ./$(buildDir)/shellmemory.o ./$(buildDir)/ram.o ./$(buildDir)/pcb.o ./$(buildDir)/stringUtilities.o ./$(buildDir)/cpu.o ./$(buildDir)/memorymanager.o
+	$(CC) -o $(programName) ./$(buildDir)/kernel.o ./$(buildDir)/shell.o ./$(buildDir)/interpreter.o ./$(buildDir)/shellmemory.o ./$(buildDir)/ram.o ./$(buildDir)/pcb.o ./$(buildDir)/stringUtilities.o ./$(buildDir)/cpu.o ./$(buildDir)/memorymanager.o
 
 # Shell.c plus any libraries used to build shell.c
 ./$(buildDir)/shell.o: $(shellDependencies)
@@ -69,6 +70,10 @@ $(programName): ./$(buildDir)/kernel.o ./$(buildDir)/shell.o ./$(buildDir)/inter
 ./$(buildDir)/stringUtilities.o: $(stringUtilitiesDependencies)
 	$(CC) $(CFLAGS) $(srcDir)/stringUtilities.c
 	mv stringUtilities.o ./$(buildDir)/
+
+./$(buildDir)/memorymanager.o: $(stringUtilitiesDependencies)
+	$(CC) $(CFLAGS) $(srcDir)/memorymanager.c
+	mv memorymanager.o ./$(buildDir)/
 
 .PHONY: clean
 clean:
