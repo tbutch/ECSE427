@@ -34,6 +34,7 @@ static const int MALFORMED_COMMAND = 3;
 static const int QUIT_TERMINAL = 4;
 static const int NONEXISTANT_FILE = 5;
 static const int RAM_LOAD_FAIL = 6;
+static const int BACKING_STORE_PREPARATION_FAILURE = 7;
 
 // Public functions
 int parseAndEvaluate(char input[], mem_t * shellMemory[], int shellMemoryMaxSize, int maxInputSize);

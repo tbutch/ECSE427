@@ -76,9 +76,9 @@ int shellUI(int argc, char** argv){
  *  Returns: void
  */
 void printWelcomeText(){
-    printf("Kernel 1.0 loaded!\n");
+    printf("Kernel 2.0 loaded!\n");
     printf("Welcome to the Tristan Bouchard shell!\n");
-    printf("Version 2.0 Updated February 2020\n");
+    printf("Version 3.0 Updated March 2020\n");
 }
 
 /*

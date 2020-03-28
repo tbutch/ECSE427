@@ -1,15 +1,23 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <dirent.h>
+#include <errno.h>
+#include <unistd.h>
+#include <sys/stat.h>
+#include <string.h>
 
 // File includes
+#include "../inc/kernel.h"
 #include "../inc/shell.h"
 #include "../inc/ram.h"
 #include "../inc/pcb.h"
 #include "../inc/interpreter.h"
 #include "../inc/cpu.h"
+#include "../inc/stringUtilities.h"
 
 // Function prototypes
-void boot();
+int boot();
+int prepareBackingStore();
 
 /*
  * Function: main
@@ -19,7 +27,11 @@ void boot();
  *  Returns: 0 if successful, 1 if not.
  */
 int main(int argc, char ** argv){
-    boot();
+    int bootStatus = boot();
+    if(bootStatus != SUCCESS){
+        printf("Failure detected in kernel boot sequence.\n");
+        return 1;
+    }
     return shellUI(argc, argv);
 }
 
@@ -30,31 +42,54 @@ int main(int argc, char ** argv){
  * 
  *  Returns: 0 if successful, 1 if not.
  */
-void boot(){
+int boot(){
     // Init PCB list, RAM, CPU 
     initPCBReadyQueue();
     initRam();
     initCPU();
-    prepareBackingStore();
+    return prepareBackingStore();
 }
 
 /*
  * Function: prepareBackingStore
  * -----------------------------------------------------------------------
- *  Function used to prepare exec backing store.
+ *  Function used to prepare exec backing store. It makes sure there is nothing in the Backing 
+ *  Store on kernel startup
  * 
- *  Returns: 0 if successful, 1 if not.
+ *  Returns: Error code if not successful, as defined in interpreter.h.
  */
-void prepareBackingStore(){
-    /*
-    This means that it clears the Backing Store. 
-    It makes sure there is nothing in the Backing Store. A Backing Store is a partition of the hard disk.
-    For us, this will be simulated by a directory. Use the C system() command to delete the old 
-    backing store directory and then create a new directory. Name the directory BackingStore.
-    Note that the directory is only deleted when you run your kernel.
-    This means, when you exit your kernel the directory will still be present for the TA to look at.
-    */
+int prepareBackingStore(){
+    DIR* dir = opendir(BACKING_STORE_NAME);
+    struct dirent * ent;
+    if (dir) {
+        /* Directory exists. */
+        char *cwd;
+        cwd = strdup(BACKING_STORE_NAME);
+
+        ent = readdir(dir);
+        while( ent != NULL ){
+            if( !isEqual(ent->d_name, ".") && !isEqual(ent->d_name, "..") ){
+                char *fileToDelete = strncat(cwd, ent->d_name, MAX_PATH_SIZE);
+                remove(fileToDelete);
+                cwd = strdup(BACKING_STORE_NAME);
+            }
+            ent = readdir(dir);
+        }
+        free(cwd);
+        closedir(dir);
+    } else if (ENOENT == errno) {
+        /* Directory does not exist. */
+        int status = mkdir(BACKING_STORE_NAME);
+        if(status == -1){
+            printf("Error: %d\n", errno);
+        }
+    } else {
+        
+        return BACKING_STORE_PREPARATION_FAILURE;
+    }
+    return SUCCESS;
 }
+
 /*
  * Function: myInit
  * -----------------------------------------------------------------------

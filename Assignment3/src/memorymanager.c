@@ -4,7 +4,9 @@
 
 // File includes
 #include "../inc/memorymanager.h"
-#include "../inc/pcb.h"
+#include "../inc/kernel.h"
+
+static const char TXT_EXTENSION[] = ".txt";
 
 /*
  * Function: launcher
@@ -14,21 +16,31 @@
  *  Returns: 1 if successful, 0 if not.
  */
 int launcher(FILE *p){
-    /*
-    1. Copy the entire file into the backing store.
-    2. Close the file pointer pointing to the original file.
-    3. Open the file in the backing store.
-    4. Our launch paging technique defaults to loading two pages of the program into RAM when it is first launched.
-       A page is 4 lines of code. If the program has 4 or less lines of code, then only one page is loaded. 
-       If the program has more than 8 lines of code, then only the first two pages are loaded.
-    5. Modify the PCB by adding an array: int pageTable[10]; 
-       The index of the array is the page number. The values stored in the cell is the frame number.
-       The array is size 10 because RAM is size 10 in our simulator (4 lines of code per page).
-       The PC must be the offset from the beginning of a frame, where offset is the line count starting from zero.
-       Keep int PC as the pointer to the current position in the process. 
-       Add int PC_page, PC_offset, pages_max. This tracks which page and offset the program is currently at,
-       and the total number of pages in this program.
-    */
+    
+    //1. Copy the entire file into the backing store.
+    copyFileToBackingStore(p);
+
+    // 2. Close the file pointer pointing to the original file.
+    // 3. Open the file in the backing store.
+    // 4. Our launch paging technique defaults to loading two pages of the program into RAM when it is first launched.
+    //    A page is 4 lines of code. If the program has 4 or less lines of code, then only one page is loaded. 
+    //    If the program has more than 8 lines of code, then only the first two pages are loaded.
+    // 5. Modify the PCB by adding an array: int pageTable[10]; 
+    //    The index of the array is the page number. The values stored in the cell is the frame number.
+    //    The array is size 10 because RAM is size 10 in our simulator (4 lines of code per page).
+    //    The PC must be the offset from the beginning of a frame, where offset is the line count starting from zero.
+    //    Keep int PC as the pointer to the current position in the process. 
+    //    Add int PC_page, PC_offset, pages_max. This tracks which page and offset the program is currently at,
+    //    and the total number of pages in this program.
+}
+
+int copyFileToBackingStore(FILE  *p){
+    // Get current number of files in directory
+    int fileCount = countFilesInBackingStore();
+}
+
+int countFilesInBackingStore(){
+    
 }
 
 int countTotalPages(FILE *f){

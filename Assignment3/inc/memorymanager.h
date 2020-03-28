@@ -1,6 +1,8 @@
 #ifndef MEM_MANAGER
 #define MEM_MANAGER
 
+#include "../inc/pcb.h"
+
 // Public function prototypes
 int launcher(FILE *p);
 int countTotalPages(FILE *f);
