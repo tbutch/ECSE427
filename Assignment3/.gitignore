@@ -6,3 +6,4 @@
 *.txt
 mysh
 mykernel
+*.code-workspace
