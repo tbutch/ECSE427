@@ -3,8 +3,12 @@
 
 typedef struct{
     int PC;
-    int start;
-    int end;
+    int max_lines;
+    int pid;
+    int pages_max;
+    int pageTable[10];
+    int PC_page;
+    int PC_offset;
 } PCB_t;
 
 // Define PCB node
@@ -20,7 +24,7 @@ typedef struct{
 } PCB_LinkedList;
 
 // Public function prototypes
-PCB_t * initPCB(int start, int end);
+PCB_t * initPCB(int pid, int max_lines, int pages_max);
 bool disposePCB(PCB_t * pcb);
 PCB_LinkedList * initPCBReadyQueue();
 PCB_LinkedList * getPCBReadyQueue();

@@ -10,7 +10,8 @@
             "shellmemory.h": "c",
             "stdbool.h": "c",
             "stat.h": "c",
-            "memorymanager.h": "c"
+            "memorymanager.h": "c",
+            "framequeue.h": "c"
         }
 	}
 }

@@ -8,10 +8,11 @@ incDir:=inc
 
 kernelDependencies:=$(srcDir)/kernel.c $(incDir)/kernel.h $(srcDir)/shell.c $(incDir)/shell.h $(srcDir)/pcb.c $(incDir)/pcb.h \
 					$(srcDir)/ram.c $(incDir)/ram.h $(srcDir)/stringUtilities.c $(incDir)/stringUtilities.h \
-					$(srcDir)/memorymanager.c $(incDir)/memorymanager.h
+					$(srcDir)/memorymanager.c $(incDir)/memorymanager.h $(srcDir)/frameQueue.c $(incDir)/frameQueue.h
 shellDependencies:=$(srcDir)/shell.c $(srcDir)/interpreter.c $(srcDir)/shellmemory.c $(incDir)/shell.h $(incDir)/interpreter.h \
 				   $(incDir)/shellmemory.h 
-ramDependencies:=$(srcDir)/ram.c $(incDir)/ram.h $(srcDir)/shell.c $(incDir)/shell.h $(srcDir)/stringUtilities.c $(incDir)/stringUtilities.h
+ramDependencies:=$(srcDir)/ram.c $(incDir)/ram.h $(srcDir)/shell.c $(incDir)/shell.h $(srcDir)/stringUtilities.c $(incDir)/stringUtilities.h \
+				 $(srcDir)/pcb.c $(incDir)/pcb.h
 cpuDependencies:=$(srcDir)/cpu.c $(incDir)/cpu.h $(srcDir)/ram.c $(incDir)/ram.h $(srcDir)/interpreter.c $(incDir)/interpreter.h \
 				 $(srcDir)/shellmemory.c $(incDir)/shellmemory.h
 interpreterDependencies:=$(srcDir)/interpreter.c $(incDir)/interpreter.h $(srcDir)/shell.c $(incDir)/shell.h $(srcDir)/ram.c $(incDir)/ram.h \
@@ -23,7 +24,8 @@ shellmemoryDependencies:=$(srcDir)/shellmemory.c $(incDir)/shellmemory.h $(srcDi
 stringUtilitiesDependencies:=$(srcDir)/stringUtilities.c $(incDir)/stringUtilities.h
 memoryManagerDependencies:=$(srcDir)/memorymanager.c $(incDir)/memorymanager.h $(srcDir)/pcb.c $(incDir)/pcb.h $(srcDir)/kernel.c $(incDir)/kernel.h \
 						   $(srcDir)/interpreter.c $(incDir)/interpreter.h $(srcDir)/stringUtilities.c $(incDir)/stringUtilities.h \
-						   $(srcDir)/shell.c $(incDir)/shell.h
+						   $(srcDir)/shell.c $(incDir)/shell.h $(srcDir)/ram.c $(incDir)/ram.h $(srcDir)/frameQueue.c $(incDir)/frameQueue.h
+frameQueueDependencies:=$(srcDir)/frameQueue.c $(incDir)/frameQueue.h
 
 ifeq  ($(DEBUG), 1)
 	CFLAGS+= -ggdb3
@@ -32,8 +34,8 @@ endif
 
 all: $(programName)
 
-$(programName): ./$(buildDir)/kernel.o ./$(buildDir)/shell.o ./$(buildDir)/interpreter.o ./$(buildDir)/shellmemory.o ./$(buildDir)/ram.o ./$(buildDir)/pcb.o ./$(buildDir)/stringUtilities.o ./$(buildDir)/cpu.o ./$(buildDir)/memorymanager.o
-	$(CC) -o $(programName) ./$(buildDir)/kernel.o ./$(buildDir)/shell.o ./$(buildDir)/interpreter.o ./$(buildDir)/shellmemory.o ./$(buildDir)/ram.o ./$(buildDir)/pcb.o ./$(buildDir)/stringUtilities.o ./$(buildDir)/cpu.o ./$(buildDir)/memorymanager.o
+$(programName): ./$(buildDir)/kernel.o ./$(buildDir)/shell.o ./$(buildDir)/interpreter.o ./$(buildDir)/shellmemory.o ./$(buildDir)/ram.o ./$(buildDir)/pcb.o ./$(buildDir)/stringUtilities.o ./$(buildDir)/cpu.o ./$(buildDir)/memorymanager.o ./$(buildDir)/frameQueue.o
+	$(CC) -o $(programName) ./$(buildDir)/kernel.o ./$(buildDir)/shell.o ./$(buildDir)/interpreter.o ./$(buildDir)/shellmemory.o ./$(buildDir)/ram.o ./$(buildDir)/pcb.o ./$(buildDir)/stringUtilities.o ./$(buildDir)/cpu.o ./$(buildDir)/memorymanager.o ./$(buildDir)/frameQueue.o
 
 # Shell.c plus any libraries used to build shell.c
 ./$(buildDir)/shell.o: $(shellDependencies)
@@ -77,6 +79,10 @@ $(programName): ./$(buildDir)/kernel.o ./$(buildDir)/shell.o ./$(buildDir)/inter
 ./$(buildDir)/memorymanager.o: $(memoryManagerDependencies)
 	$(CC) $(CFLAGS) $(srcDir)/memorymanager.c
 	mv memorymanager.o ./$(buildDir)/
+
+./$(buildDir)/frameQueue.o: $(frameQueueDependencies)
+	$(CC) $(CFLAGS) $(srcDir)/frameQueue.c
+	mv frameQueue.o ./$(buildDir)/
 
 .PHONY: clean
 clean:

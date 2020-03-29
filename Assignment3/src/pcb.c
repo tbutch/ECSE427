@@ -15,11 +15,16 @@ PCB_LinkedList * readyList;
  * 
  *  Returns: PCB_t pointer
  */
-PCB_t * initPCB(int start, int end){
+PCB_t * initPCB(int pid, int max_lines, int pages_max){
     PCB_t * pcb = malloc(sizeof(PCB_t));
-    pcb->PC=start;
-    pcb->start=start;
-    pcb->end=end;
+    pcb->PC=-1;
+    pcb->PC_offset = -1;
+    pcb->PC_page=-1;
+    pcb->max_lines=max_lines;
+    pcb->pages_max=pages_max;
+    for(int i = 0; i < 10; i ++){
+        pcb->pageTable[i] = -1;
+    }
     return pcb;
 }
 

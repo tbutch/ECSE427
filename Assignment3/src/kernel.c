@@ -15,6 +15,7 @@
 #include "../inc/cpu.h"
 #include "../inc/stringUtilities.h"
 #include "../inc/memorymanager.h"
+#include "../inc/frameQueue.h"
 
 // Function prototypes
 int boot();
@@ -45,15 +46,23 @@ int main(int argc, char ** argv){
  */
 int boot(){
     // Init PCB list, RAM, CPU
-    printf("pre-boot\n");
+    printf("----Initiate Boot Sequence----\n\n");
+    printf("Preparing Ready Queue...");
     initPCBReadyQueue();
-    printf("Ready Queue prepared\n");
+    printf(" Done.\n");
+    printf("Preparing RAM...");
     initRam();
-    printf("RAM prepared\n");
+    printf(" Done.\n");
+    printf("Preparing FIFO Frame Queue...");
+    initFrameReadyQueue();
+    printf(" Done.\n");
+    printf("Preparing CPU...");
     initCPU();
-    printf("CPU prepared\n");
+    printf(" Done.\n");
+    printf("Preparing Backing Store...");
     int status = prepareBackingStore();
-    printf("Boot Sequence Completed\n");
+    printf(" Done.\n");
+    printf("\n----Boot Sequence Completed!----\n\n");
     return status;
 }
 
@@ -87,20 +96,20 @@ int myInit(char* fileName){
 
     launcher(file);
 
-    int * programStart = malloc(sizeof(int));
-    int * programEnd = malloc(sizeof(int));
-    *programStart = -1;
-    *programEnd = -1;
-    if(!addToRAM(file, programStart, programEnd)){
-        return RAM_LOAD_FAIL;
-    }
-    fclose(file);
-    // Create PCB for program
-    PCB_t * programPCB = initPCB(*programStart, *programEnd);
-    free(programStart);
-    free(programEnd);
-    // Add PCB to ready queue
-    enqueuePCB(programPCB);
+    // int * programStart = malloc(sizeof(int));
+    // int * programEnd = malloc(sizeof(int));
+    // *programStart = -1;
+    // *programEnd = -1;
+    // if(!addToRAM(file, programStart, programEnd)){
+    //     return RAM_LOAD_FAIL;
+    // }
+    // fclose(file);
+    // // Create PCB for program
+    // PCB_t * programPCB = initPCB(*programStart, *programEnd);
+    // free(programStart);
+    // free(programEnd);
+    // // Add PCB to ready queue
+    // enqueuePCB(programPCB);
     return SUCCESS;
 }
 
@@ -128,10 +137,12 @@ int scheduler(mem_t * shellMemory[], int shellMemoryMaxSize, int maxInputSize){
             }
             cpu->IP = pcb->PC;
             // c. It calls the run(quanta) function within cpu.c to run the script by copying quanta lines of code from ram[] using IP into the IR, which then calls: interpreter(IR)
-            int quantaToRun = (pcb->end - pcb->PC + 1 > BASE_QUANTA) ? BASE_QUANTA : pcb->end - pcb->PC + 1;
+
+            // TODO: FIX THIS SHIT
+            int quantaToRun = (pcb->max_lines - pcb->PC + 1 > BASE_QUANTA) ? BASE_QUANTA : pcb->max_lines - pcb->PC + 1;
             int newPC = run(quantaToRun, shellMemory, shellMemoryMaxSize, maxInputSize);
             pcb->PC = newPC;
-            if(pcb->PC > pcb->end){
+            if(pcb->PC > pcb->max_lines){
                 // f. If the program is at the end, then the PCB terminates (as described previously / above)
                 disposePCB(pcb);
             } else {

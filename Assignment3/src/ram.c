@@ -44,6 +44,52 @@ bool addToRAM(FILE *p, int *start, int *end){
     return true;
 }
 
+/*
+ * Function: addFrameToRAM
+ * -----------------------------------------------------------------------
+ *  Function used to add a specified page from the backing store to RAM
+ * 
+ *  Returns: true if success, false otherwise
+ */
+bool addFrameToRAM(FILE * file, PCB_t * pcb, int pageNumber, int frameNumber){
+    rewind(file);
+    int startLine = pageNumber * FRAME_SIZE;
+    int offset = 0;
+    // Max page and max line include zero as a number, so a file with lines 0-3 has 4 lines
+    // and page 0 as 1 page.
+    if(pageNumber >= pcb->pages_max || startLine >= pcb->max_lines){
+        printf("Cannot load requested page #%d from file %d, which only contains %d lines!\n", pageNumber, pcb->pid, pcb->max_lines);
+        return false;
+    }
+    // begin by placing file pointer to correct position
+    char currentLine[USER_LINE_INPUT_SIZE];
+    for(int i = 0; i < pcb->max_lines; i++){
+        fgets(currentLine, USER_LINE_INPUT_SIZE, file);
+
+        if(currentLine == NULL){
+            break;
+        } else if(i >= startLine && (i <= (startLine + FRAME_SIZE))){
+            // Correct lines indices to copy over.
+            ram[(frameNumber * FRAME_SIZE) + offset] = strdup(currentLine);
+            offset++;
+        } else if(i > (startLine + FRAME_SIZE)){
+            // Line transfer done or EOF reached
+            break;
+        }
+    }
+
+    // Frame was not completely filled by data, so we write null in the remaining cells.
+    if(offset < FRAME_SIZE - 1){
+        while(offset < FRAME_SIZE){
+            ram[(frameNumber * FRAME_SIZE) + offset] = NULL;
+            offset++;
+        }
+    }
+
+    return true;
+    
+}
+
 bool cleanRam(){
     for(int i = 0; i < RAMSIZE; i++){
         ram[i] = NULL;
