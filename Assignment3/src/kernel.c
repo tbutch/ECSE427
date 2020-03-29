@@ -14,6 +14,7 @@
 #include "../inc/interpreter.h"
 #include "../inc/cpu.h"
 #include "../inc/stringUtilities.h"
+#include "../inc/memorymanager.h"
 
 // Function prototypes
 int boot();
@@ -43,11 +44,17 @@ int main(int argc, char ** argv){
  *  Returns: 0 if successful, 1 if not.
  */
 int boot(){
-    // Init PCB list, RAM, CPU 
+    // Init PCB list, RAM, CPU
+    printf("pre-boot\n");
     initPCBReadyQueue();
+    printf("Ready Queue prepared\n");
     initRam();
+    printf("RAM prepared\n");
     initCPU();
-    return prepareBackingStore();
+    printf("CPU prepared\n");
+    int status = prepareBackingStore();
+    printf("Boot Sequence Completed\n");
+    return status;
 }
 
 /*
@@ -59,34 +66,8 @@ int boot(){
  *  Returns: Error code if not successful, as defined in interpreter.h.
  */
 int prepareBackingStore(){
-    DIR* dir = opendir(BACKING_STORE_NAME);
-    struct dirent * ent;
-    if (dir) {
-        /* Directory exists. */
-        char *cwd;
-        cwd = strdup(BACKING_STORE_NAME);
-
-        ent = readdir(dir);
-        while( ent != NULL ){
-            if( !isEqual(ent->d_name, ".") && !isEqual(ent->d_name, "..") ){
-                char *fileToDelete = strncat(cwd, ent->d_name, MAX_PATH_SIZE);
-                remove(fileToDelete);
-                cwd = strdup(BACKING_STORE_NAME);
-            }
-            ent = readdir(dir);
-        }
-        free(cwd);
-        closedir(dir);
-    } else if (ENOENT == errno) {
-        /* Directory does not exist. */
-        int status = mkdir(BACKING_STORE_NAME);
-        if(status == -1){
-            printf("Error: %d\n", errno);
-        }
-    } else {
-        
-        return BACKING_STORE_PREPARATION_FAILURE;
-    }
+    system("rmdir /Q /S \"./BackingStore\"");
+    system("mkdir \"./BackingStore\"");
     return SUCCESS;
 }
 
@@ -103,6 +84,9 @@ int myInit(char* fileName){
     if(file == NULL){
         return NONEXISTANT_FILE;
     }
+
+    launcher(file);
+
     int * programStart = malloc(sizeof(int));
     int * programEnd = malloc(sizeof(int));
     *programStart = -1;

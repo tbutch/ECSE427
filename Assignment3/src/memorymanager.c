@@ -1,12 +1,22 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <dirent.h>
+#include <errno.h>
+#include <unistd.h>
+#include <sys/stat.h>
+#include <string.h>
 
 // File includes
 #include "../inc/memorymanager.h"
 #include "../inc/kernel.h"
+#include "../inc/interpreter.h"
+#include "../inc/stringUtilities.h"
+#include "../inc/shell.h"
 
-static const char TXT_EXTENSION[] = ".txt";
+// Function prototypes
+int countFilesInBackingStore();
+FILE * copyFileToBackingStore(FILE  *p);
 
 /*
  * Function: launcher
@@ -16,11 +26,20 @@ static const char TXT_EXTENSION[] = ".txt";
  *  Returns: 1 if successful, 0 if not.
  */
 int launcher(FILE *p){
-    
+    // Pointer verification
+    if(p == NULL){
+        return 0;
+    }
     //1. Copy the entire file into the backing store.
-    copyFileToBackingStore(p);
+    FILE * newFile = copyFileToBackingStore(p);
+    if(newFile == NULL){
+        return 0;
+    }
 
     // 2. Close the file pointer pointing to the original file.
+    //fclose(p);
+    fclose(newFile);
+
     // 3. Open the file in the backing store.
     // 4. Our launch paging technique defaults to loading two pages of the program into RAM when it is first launched.
     //    A page is 4 lines of code. If the program has 4 or less lines of code, then only one page is loaded. 
@@ -34,13 +53,57 @@ int launcher(FILE *p){
     //    and the total number of pages in this program.
 }
 
-int copyFileToBackingStore(FILE  *p){
+FILE * copyFileToBackingStore(FILE  *p){
     // Get current number of files in directory
     int fileCount = countFilesInBackingStore();
+    if(fileCount < 0){
+        // If the directory does not exist, there was an error preparing the backing store
+        return NULL;
+    }
+
+    char dir[100];
+    char cmd[100];
+    snprintf(cmd, 100, "touch \"./BackingStore/%d.txt\"", fileCount);
+    snprintf(dir, 100, "./BackingStore/%d.txt", fileCount);
+    system(cmd);
+    FILE * fp = fopen(dir, "w+");
+    if(fp == NULL){
+        printf("Cannot open file!\n");
+        return NULL;
+    }
+
+    // Parse original file and echo that line to new file
+    char buffer[USER_LINE_INPUT_SIZE];
+    while(fgets(buffer, USER_LINE_INPUT_SIZE, p)){
+        if(isEqual(buffer,"\n")){
+            continue;
+        }
+        fprintf(fp, "%s", buffer);
+    }
+    // Reset file pointer to start
+    rewind(p);
+    return fp;
 }
 
 int countFilesInBackingStore(){
-    
+    DIR* dir = opendir(BACKING_STORE_NAME);
+    struct dirent * ent;
+    int count = 0;
+    if (dir) {
+        /* Directory exists. */
+        ent = readdir(dir);
+        while( ent != NULL ){
+            if( !isEqual(ent->d_name, ".") && !isEqual(ent->d_name, "..") ){
+                count++;
+            }
+            ent = readdir(dir);
+        }
+        closedir(dir);
+    } else if (ENOENT == errno) {
+        /* Directory does not exist, we have a problem lel */
+        return -1;
+    }
+    return count;
 }
 
 int countTotalPages(FILE *f){

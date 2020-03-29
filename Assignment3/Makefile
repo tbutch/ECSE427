@@ -7,7 +7,8 @@ buildDir:=build
 incDir:=inc
 
 kernelDependencies:=$(srcDir)/kernel.c $(incDir)/kernel.h $(srcDir)/shell.c $(incDir)/shell.h $(srcDir)/pcb.c $(incDir)/pcb.h \
-					$(srcDir)/ram.c $(incDir)/ram.h $(srcDir)/stringUtilities.c $(incDir)/stringUtilities.h
+					$(srcDir)/ram.c $(incDir)/ram.h $(srcDir)/stringUtilities.c $(incDir)/stringUtilities.h \
+					$(srcDir)/memorymanager.c $(incDir)/memorymanager.h
 shellDependencies:=$(srcDir)/shell.c $(srcDir)/interpreter.c $(srcDir)/shellmemory.c $(incDir)/shell.h $(incDir)/interpreter.h \
 				   $(incDir)/shellmemory.h 
 ramDependencies:=$(srcDir)/ram.c $(incDir)/ram.h $(srcDir)/shell.c $(incDir)/shell.h $(srcDir)/stringUtilities.c $(incDir)/stringUtilities.h
@@ -20,7 +21,9 @@ pcbDependencies:=$(srcDir)/pcb.c $(incDir)/pcb.h
 shellmemoryDependencies:=$(srcDir)/shellmemory.c $(incDir)/shellmemory.h $(srcDir)/interpreter.c $(incDir)/interpreter.h \
 						 $(srcDir)/stringUtilities.c $(incDir)/stringUtilities.h
 stringUtilitiesDependencies:=$(srcDir)/stringUtilities.c $(incDir)/stringUtilities.h
-memoryManagerDependencies:=$(srcDir)/memorymanager.c $(incDir)/memorymanager.h $(srcDir)/pcb.c $(incDir)/pcb.h $(srcDir)/kernel.c $(incDir)/kernel.h
+memoryManagerDependencies:=$(srcDir)/memorymanager.c $(incDir)/memorymanager.h $(srcDir)/pcb.c $(incDir)/pcb.h $(srcDir)/kernel.c $(incDir)/kernel.h \
+						   $(srcDir)/interpreter.c $(incDir)/interpreter.h $(srcDir)/stringUtilities.c $(incDir)/stringUtilities.h \
+						   $(srcDir)/shell.c $(incDir)/shell.h
 
 ifeq  ($(DEBUG), 1)
 	CFLAGS+= -ggdb3
@@ -71,7 +74,7 @@ $(programName): ./$(buildDir)/kernel.o ./$(buildDir)/shell.o ./$(buildDir)/inter
 	$(CC) $(CFLAGS) $(srcDir)/stringUtilities.c
 	mv stringUtilities.o ./$(buildDir)/
 
-./$(buildDir)/memorymanager.o: $(stringUtilitiesDependencies)
+./$(buildDir)/memorymanager.o: $(memoryManagerDependencies)
 	$(CC) $(CFLAGS) $(srcDir)/memorymanager.c
 	mv memorymanager.o ./$(buildDir)/
 

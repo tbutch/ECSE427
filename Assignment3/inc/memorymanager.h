@@ -11,4 +11,9 @@ int findFrame();
 int findVictim(PCB_t *p);
 int updatePageTable(PCB_t *p, int pageNumber, int frameNumber, int victimFrame);
 
+// Constants
+static const int MAX_BACKING_STORE_FILES = 99;
+#define MAX_BACKING_STORE_FILES_CT 3
+static const char TXT_EXTENSION[] = ".txt";
+
 #endif

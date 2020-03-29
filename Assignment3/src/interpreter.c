@@ -339,24 +339,26 @@ int exec(char * wordArray[], mem_t * shellMemory[], int shellMemoryMaxSize, int 
     if(inputLength > 4 || inputLength < 2){
         return MALFORMED_COMMAND;
     }
-    bool sameCommands = false;
-    switch (inputLength)
-    {
-    case 2:
-        sameCommands = false;
-    case 3:
-        sameCommands = (bool) isEqual(wordArray[1], wordArray[2]);
-        break;
-    case 4:
-        sameCommands = (bool) isEqual(wordArray[1], wordArray[2]) || (bool) isEqual(wordArray[1], wordArray[3]) || (bool) isEqual(wordArray[2], wordArray[3]);
-        break;
-    default:
-        return FATAL_ERROR;
-    }
-    if(sameCommands){
-        printf("Error: Script is already loaded.\n");
-        return MALFORMED_COMMAND;
-    }
+    
+    /* The following code is used for disallowing same commands in an exec call */
+    // bool sameCommands = false;
+    // switch (inputLength)
+    // {
+    // case 2:
+    //     sameCommands = false;
+    // case 3:
+    //     sameCommands = (bool) isEqual(wordArray[1], wordArray[2]);
+    //     break;
+    // case 4:
+    //     sameCommands = (bool) isEqual(wordArray[1], wordArray[2]) || (bool) isEqual(wordArray[1], wordArray[3]) || (bool) isEqual(wordArray[2], wordArray[3]);
+    //     break;
+    // default:
+    //     return FATAL_ERROR;
+    // }
+    // if(sameCommands){
+    //     printf("Error: Script is already loaded.\n");
+    //     return MALFORMED_COMMAND;
+    // }
 
     for(int i = 1; i < inputLength; i++){
         int status = myInit(wordArray[i]);
