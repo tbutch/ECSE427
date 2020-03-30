@@ -94,22 +94,10 @@ int myInit(char* fileName){
         return NONEXISTANT_FILE;
     }
 
-    launcher(file);
-
-    // int * programStart = malloc(sizeof(int));
-    // int * programEnd = malloc(sizeof(int));
-    // *programStart = -1;
-    // *programEnd = -1;
-    // if(!addToRAM(file, programStart, programEnd)){
-    //     return RAM_LOAD_FAIL;
-    // }
-    // fclose(file);
-    // // Create PCB for program
-    // PCB_t * programPCB = initPCB(*programStart, *programEnd);
-    // free(programStart);
-    // free(programEnd);
-    // // Add PCB to ready queue
-    // enqueuePCB(programPCB);
+    int status = launcher(file);
+    if(status == 0){
+        return FAILURE;
+    }
     return SUCCESS;
 }
 

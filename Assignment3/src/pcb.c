@@ -20,6 +20,7 @@ PCB_t * initPCB(int pid, int max_lines, int pages_max){
     pcb->PC=-1;
     pcb->PC_offset = -1;
     pcb->PC_page=-1;
+    pcb->pid = pid;
     pcb->max_lines=max_lines;
     pcb->pages_max=pages_max;
     for(int i = 0; i < 10; i ++){

@@ -32,20 +32,21 @@ bool prepareFrameReadyQueue();
  *  Returns: 1 if successful, 0 if not.
  */
 int launcher(FILE *p){
-    // Pointer verification
+    // File pointer verification
     if(p == NULL){
         return 0;
     }
     //1. Copy the entire file into the backing store.
-    int * pid;
+    int * pid = malloc(sizeof(int));
     FILE * newFile = copyFileToBackingStore(p, pid);
+    
+    // 2. Close the file pointer pointing to the original file.
+    fclose(p);
+
     if(newFile == NULL){
         printf("Error opening backing store file, aborting...\n");
         return 0;
     }
-
-    // 2. Close the file pointer pointing to the original file.
-    fclose(p);
     
     // Prepare the FIFO Ready Queue by filling it with frames.
     bool readyQueuePrepared = prepareFrameReadyQueue();
@@ -54,25 +55,37 @@ int launcher(FILE *p){
         return 0;
     }
 
-    // 4. Our launch paging technique defaults to loading two pages of the program into RAM when it is first launched.
-    //    A page is 4 lines of code. If the program has 4 or less lines of code, then only one page is loaded. 
-    //    If the program has more than 8 lines of code, then only the first two pages are loaded.
-    int * pageCount;
-    int * lineCount;
-    int totalPageCount = countTotalPages(p, pageCount, lineCount);
-    if (totalPageCount < 0){
+    int * pageCount = malloc(sizeof(int));
+    int * lineCount = malloc(sizeof(int));
+    countTotalPages(newFile, pageCount, lineCount);
+    if (*pageCount < 0){
+        // Program of improper length.
+        printf("Program does not contain the correct number of pages.\n");
+        printf("Pages counted: %d.\n", *pageCount);
         return 0;
     }
     // Create PCB
-    PCB_t * pcb = initPCB(*pid, countLinesInFile(p), totalPageCount);
+    PCB_t * pcb = initPCB(*pid, *lineCount, *pageCount);
 
-    // Add initial pages to RAM
+    free(pid);
+    free(pageCount);
+    free(lineCount);
+    // Add initial pages to RAM - This function also updates the PCB page table
     int ramLoadStatus = loadToRamInitial(newFile, pcb);
     fclose(newFile);
     if(ramLoadStatus != SUCCESS){
         printf("Problem loading initial pages to RAM, aborting...\n");
         return 0;
-    } 
+    }
+
+    // Add PCB to ready list.
+    bool enqueueSuccess = enqueuePCB(pcb);
+    if(!enqueueSuccess){
+        printf("Error adding PCB to ready queue.\n");
+        printf("Please verify that ready queue is properly initialized.\n");
+        return 0;
+    }
+    return 1;
 }
 
 /*
@@ -80,18 +93,22 @@ int launcher(FILE *p){
  * -----------------------------------------------------------------------
  *  Function used to load initial amount of pages for the program to RAM
  * 
+ *  Our launch paging technique defaults to loading two pages of the program into RAM when it is first launched.
+ *  A page is 4 lines of code. If the program has 4 or less lines of code, then only one page is loaded. 
+ *  If the program has more than 8 lines of code, then only the first two pages are loaded.
+ * 
  *  Returns: 1 if successful, 0 if not.
  */
 int loadToRamInitial(FILE * p, PCB_t * pcb){
     char currentLine[USER_LINE_INPUT_SIZE];
     int totalPagesToLoad = pcb->pages_max > 2? 2: pcb->pages_max;
-    for(int  pageNumber=0 ; pageNumber  < totalPagesToLoad; pageNumber ++){
+    for(int  pageNumber=0 ; pageNumber  < totalPagesToLoad; pageNumber++){
         int frameNo = findFrame();
         if(frameNo == -1){
             frameNo = findVictim(pcb);
         }
         // Add required frame to RAM
-        bool success = addFrameToRAM(p, pcb, pageNumber, frameNo);
+        bool success = addPageToRAM(p, pcb, pageNumber, frameNo);
         if(!success){
             return RAM_LOAD_FAIL;
         }
@@ -100,6 +117,14 @@ int loadToRamInitial(FILE * p, PCB_t * pcb){
     }
 }
 
+/*
+ * Function: copyFileToBackingStore
+ * -----------------------------------------------------------------------
+ *  Function used to copy specified file to baking store. Given
+ *  file must be less than RAMSIZE number of lines in length.
+ * 
+ *  Returns: Backing store file pointer.
+ */
 FILE * copyFileToBackingStore(FILE  *p, int * pid){
     // Get current number of files in directory
     int fileCount = countFilesInBackingStore();
@@ -120,6 +145,15 @@ FILE * copyFileToBackingStore(FILE  *p, int * pid){
         return NULL;
     }
 
+    // Verify that file contains less than RAMSIZE lines.
+    rewind(p);
+    int lineCount = countLinesInFile(p);
+    rewind(p);
+
+    if(! (lineCount <= RAMSIZE)){
+        printf("Specified file contains %d lines. The maximum amount of lines is %d\n`", lineCount, RAMSIZE);
+        return NULL;
+    }
     // Parse original file and echo that line to new file
     char buffer[USER_LINE_INPUT_SIZE];
     while(fgets(buffer, USER_LINE_INPUT_SIZE, p)){
@@ -128,9 +162,9 @@ FILE * copyFileToBackingStore(FILE  *p, int * pid){
         }
         fprintf(fp, "%s", buffer);
     }
-    // Reset file pointer to start
-    rewind(p);
-    
+
+    // Flush file stream to write to it without closing the pointer
+    fflush(fp);
     return fp;
 }
 
@@ -168,20 +202,21 @@ int countTotalPages(FILE *f, int * pageCount, int * lineCount){
     // Reset file pointer to start
     rewind(f);
     *lineCount = countLinesInFile(f);
-    double pgCount = (double) (*lineCount)/4;
-    if(pgCount > 10 || pgCount <= 0){
+    double pgCount = (double) (*lineCount)/FRAME_SIZE;
+    if(pgCount > NUMBER_OF_FRAMES || pgCount <= 0){
         return -1;
     }
     *pageCount = (int) ceil(pgCount);
     // Reset file pointer to start
     rewind(f);
-    return (int) pageCount;
+    return (int) *pageCount;
 }
 
 /*
  * Function: countLinesInFile
  * -----------------------------------------------------------------------
- *  Function used to count total number of lines in specified file
+ *  Function used to count total number of lines in specified file. This function
+ *  ignores newlines, as when copied to the backing store, newlines are not copied.
  * 
  *  Returns: number from 1 to 10 if program of correct length, -1 otherwise
  */
@@ -192,7 +227,7 @@ int countLinesInFile(FILE * f){
         return -1;
     }
 
-    // Parse backing store file and count lines
+    // Parse file and count lines
     char buffer[USER_LINE_INPUT_SIZE];
     while(fgets(buffer, USER_LINE_INPUT_SIZE, f)){
         if(isEqual(buffer,"\n")){
@@ -213,8 +248,7 @@ int countLinesInFile(FILE * f){
  */
 void loadPage(int pageNumber, FILE *f, int frameNumber){
     rewind(f);
-
-
+    // This function is covered by addFrameToRam();
 }
 
 /*
@@ -230,18 +264,41 @@ int findFrame(){
     return dequeueFrame();
 }
 
-int findVictim(PCB_t *p){
-    /*
-    This function is only invoke when findFrame() returns a -1. 
-    Use a random number generator to pick a random frame number. If the frame number does not belong to the pages
-    of the active PCB (ie. it is not in its page table) then return that frame number as the victim, 
-    otherwise, starting from the randomly selected frame, iteratively increment the frame number (modulo-wise) 
-    until you come to a frame number not belong to the PCB’s pages, and return that number.
-    */
+/*
+ * Function: findVictim
+ * -----------------------------------------------------------------------
+ *  This function is only invoke when findFrame() returns a -1.
+ *  We use a RNG to get a random number from 0 to NUMBER_OF_FRAMES -1. We then
+ *  check to see if that frame belongs.
+ * 
+ *  Returns: void
+ */
+int findVictim(PCB_t *pcb){
+   int randomNum = rand() % NUMBER_OF_FRAMES;
+   if(randomNum < 0 || randomNum > NUMBER_OF_FRAMES -1){
+       printf("Error generating random frame number. Generated number was:\n");
+       printf("\t%d\n. It should be within the range [0, %d]", randomNum, NUMBER_OF_FRAMES-1);
+   }
+   while(true){
+       for(int i = 0; i < NUMBER_OF_FRAMES; i++){
+           if(pcb->pageTable[i] == randomNum){
+                randomNum = (randomNum + 1) % NUMBER_OF_FRAMES;
+                // Set to -1 so that counter is incremented to 0
+                i = -1;
+           }
+       }
+       break;
+   }
    return -1;
 }
 
-int updatePageTable(PCB_t *p, int pageNumber, int frameNumber, int victimFrame){
+/*
+ * Function: updatePageTable
+ * -----------------------------------------------------------------------
+ *  Update page table for specified PCB. If there is no victim frame, it is 
+ *  set to -1 to indicate there is no need to update the other PCB.
+ */
+int updatePageTable(PCB_t * pcb, int pageNumber, int frameNumber, int victimFrame){
     /*
     The page tables must also be updated to reflect the changes. 
     If a victim was selected then the PCB page table of the victim must be updated.
@@ -249,6 +306,20 @@ int updatePageTable(PCB_t *p, int pageNumber, int frameNumber, int victimFrame){
     (if there was one).
     p->pageTable[pageNumber] = frameNumber (or = victimFrame).
     */
+    if(victimFrame == -1){
+        pcb->pageTable[pageNumber] = frameNumber;
+    } else {
+        // We need to set the page in the victim pcb to -1 where the related frame is found
+        // This needs to be done because it is not necessarily true that a certain page for
+        // a PCB equates to that same page for another PCB
+        for(int i = 0; i < NUMBER_OF_FRAMES; i++){
+            if(pcb->pageTable[i] == frameNumber){
+                pcb->pageTable[i] = -1;
+                break;
+            }
+        }
+         
+    }
 }
 
 /*
@@ -262,6 +333,9 @@ bool prepareFrameReadyQueue(){
     for(int i = 0; i < NUMBER_OF_FRAMES; i++){
         bool success = enqueueFrame(i);
         if(!success){
+            printf("Error preparing the ready queue with available frames\n");
+            printf("Please verify that frame ready queue is properly initialized.\n ");
+            printf("Aborting...\n ");
             return false;
         }
     }

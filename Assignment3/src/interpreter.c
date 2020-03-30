@@ -363,11 +363,12 @@ int exec(char * wordArray[], mem_t * shellMemory[], int shellMemoryMaxSize, int 
     for(int i = 1; i < inputLength; i++){
         int status = myInit(wordArray[i]);
 
-        if(status == NONEXISTANT_FILE || status == RAM_LOAD_FAIL){
+        if(status == NONEXISTANT_FILE || status == RAM_LOAD_FAIL || status == FAILURE){
             cleanRam();
             return status;
         }
     }
+    return SUCCESS
     return scheduler(shellMemory, shellMemoryMaxSize, maxInputSize);
 }
 

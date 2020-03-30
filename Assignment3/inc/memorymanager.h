@@ -8,8 +8,8 @@ int launcher(FILE *p);
 int countTotalPages(FILE * f, int * pageCount, int * lineCount);
 void loadPage(int pageNumber, FILE *f, int frameNumber);
 int findFrame();
-int findVictim(PCB_t *p);
-int updatePageTable(PCB_t *p, int pageNumber, int frameNumber, int victimFrame);
+int findVictim(PCB_t *pcb);
+int updatePageTable(PCB_t * pcb, int pageNumber, int frameNumber, int victimFrame);
 
 // Constants
 static const int MAX_BACKING_STORE_FILES = 99;

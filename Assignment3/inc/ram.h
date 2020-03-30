@@ -18,7 +18,7 @@ bool addToRAM(FILE * p , int * start, int * end);
 bool cleanRam();
 bool initRam();
 int getNextAvailableLineInRam();
-bool addFrameToRAM(FILE * file, PCB_t * pcb, int pageNumber, int frameNumber);
+bool addPageToRAM(FILE * file, PCB_t * pcb, int pageNumber, int frameNumber);
 //bool cleanRamLines(int start, int end);
 
 #endif

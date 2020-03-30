@@ -51,7 +51,7 @@ bool addToRAM(FILE *p, int *start, int *end){
  * 
  *  Returns: true if success, false otherwise
  */
-bool addFrameToRAM(FILE * file, PCB_t * pcb, int pageNumber, int frameNumber){
+bool addPageToRAM(FILE * file, PCB_t * pcb, int pageNumber, int frameNumber){
     rewind(file);
     int startLine = pageNumber * FRAME_SIZE;
     int offset = 0;
@@ -68,26 +68,24 @@ bool addFrameToRAM(FILE * file, PCB_t * pcb, int pageNumber, int frameNumber){
 
         if(currentLine == NULL){
             break;
-        } else if(i >= startLine && (i <= (startLine + FRAME_SIZE))){
+        } else if(i >= startLine && (i < (startLine + FRAME_SIZE))){
             // Correct lines indices to copy over.
             ram[(frameNumber * FRAME_SIZE) + offset] = strdup(currentLine);
             offset++;
-        } else if(i > (startLine + FRAME_SIZE)){
+        } else if(i >= (startLine + FRAME_SIZE)){
             // Line transfer done or EOF reached
             break;
         }
     }
 
     // Frame was not completely filled by data, so we write null in the remaining cells.
-    if(offset < FRAME_SIZE - 1){
+    if(offset < FRAME_SIZE){
         while(offset < FRAME_SIZE){
             ram[(frameNumber * FRAME_SIZE) + offset] = NULL;
             offset++;
         }
     }
-
-    return true;
-    
+    return true; 
 }
 
 bool cleanRam(){
