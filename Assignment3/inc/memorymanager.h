@@ -6,10 +6,11 @@
 // Public function prototypes
 int launcher(FILE *p);
 int countTotalPages(FILE * f, int * pageCount, int * lineCount);
-void loadPage(int pageNumber, FILE *f, int frameNumber);
+bool loadPage(int pageNumber, PCB_t * pcb);
 int findFrame();
 int findVictim(PCB_t *pcb);
 int updatePageTable(PCB_t * pcb, int pageNumber, int frameNumber, int victimFrame);
+bool isPageLoaded(int pageNumber, PCB_t * pcb);
 
 // Constants
 static const int MAX_BACKING_STORE_FILES = 99;

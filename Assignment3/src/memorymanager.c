@@ -20,9 +20,10 @@
 // Function prototypes
 int countFilesInBackingStore();
 FILE * copyFileToBackingStore(FILE  *p, int * pid);
-int loadToRamInitial(FILE * p, PCB_t * pcb);
+int loadToRamInitial(PCB_t * pcb);
 int countLinesInFile(FILE * f);
 bool prepareFrameReadyQueue();
+PCB_t * findVictimPCB(int frameNo);
 
 /*
  * Function: launcher
@@ -70,9 +71,9 @@ int launcher(FILE *p){
     free(pid);
     free(pageCount);
     free(lineCount);
-    // Add initial pages to RAM - This function also updates the PCB page table
-    int ramLoadStatus = loadToRamInitial(newFile, pcb);
     fclose(newFile);
+    // Add initial pages to RAM - This function also updates the PCB page table
+    int ramLoadStatus = loadToRamInitial(pcb);
     if(ramLoadStatus != SUCCESS){
         printf("Problem loading initial pages to RAM, aborting...\n");
         return 0;
@@ -97,24 +98,26 @@ int launcher(FILE *p){
  *  A page is 4 lines of code. If the program has 4 or less lines of code, then only one page is loaded. 
  *  If the program has more than 8 lines of code, then only the first two pages are loaded.
  * 
- *  Returns: 1 if successful, 0 if not.
+ *  Returns: Success if successful, RAM_LOAD_FAIL if not.
  */
-int loadToRamInitial(FILE * p, PCB_t * pcb){
+int loadToRamInitial(PCB_t * pcb){
     char currentLine[USER_LINE_INPUT_SIZE];
     int totalPagesToLoad = pcb->pages_max > 2? 2: pcb->pages_max;
     for(int  pageNumber=0 ; pageNumber  < totalPagesToLoad; pageNumber++){
-        int frameNo = findFrame();
-        if(frameNo == -1){
-            frameNo = findVictim(pcb);
-        }
-        // Add required frame to RAM
-        bool success = addPageToRAM(p, pcb, pageNumber, frameNo);
-        if(!success){
-            return RAM_LOAD_FAIL;
-        }
-        // There are no victims here, so victim frame is NO_VICTIM
-        updatePageTable(pcb, pageNumber, frameNo, NO_VICTIM);
+        // int frameNo = findFrame();
+        // if(frameNo == -1){
+        //     frameNo = findVictim(pcb);
+        // }
+        // // Add required frame to RAM
+        // bool success = addPageToRAM(p, pcb, pageNumber, frameNo);
+        // if(!success){
+        //     return RAM_LOAD_FAIL;
+        // }
+        // // There are no victims here, so victim frame is NO_VICTIM
+        // updatePageTable(pcb, pageNumber, frameNo, NO_VICTIM);
+        loadPage(pageNumber, pcb);
     }
+    return SUCCESS;
 }
 
 /*
@@ -241,14 +244,60 @@ int countLinesInFile(FILE * f){
 /*
  * Function: loadPage
  * -----------------------------------------------------------------------
- *  FILE *f points to the beginning of the file in the backing store. The variable pageNumber (0 <= x <= 9) 
- *  is the desired page from the backing store. The function loads the 4 lines of code from the page into the frame in ram[].
+ *  Request specified page to be loaded to RAM from this PCB.
+ *  The variable pageNumber (0 <= x <= 9) is the desired page from the backing store. 
+ *  The function loads the 4 lines of code from the page into the frame in ram[] and returns
+ *  the victim frame, if no frames were available.
  * 
- *  Returns: void
+ *  Returns: frameNumber to which it was loaded.
  */
-void loadPage(int pageNumber, FILE *f, int frameNumber){
-    rewind(f);
-    // This function is covered by addFrameToRam();
+bool loadPage(int pageNumber, PCB_t * pcb){
+
+    // Open file
+    char dir[100];
+    snprintf(dir, 100, "./BackingStore/%d", pcb->pid);
+    FILE * p = fopen(dir, "r+");
+
+    if(p == NULL){
+        printf("Error opening file %d from backing store\n. Aborting", pcb->pid);
+    }
+    
+    bool victim = false;
+    int frameNo = findFrame();
+    if(frameNo == -1){
+        victim = true;
+        frameNo = findVictim(pcb);
+    }
+    // Add required frame to RAM
+    bool success = addPageToRAM(p, pcb, pageNumber, frameNo);
+    if(!success){
+        return RAM_LOAD_FAIL;
+    }
+
+    // Update victim PCB to tell it that its program is no longer in RAM
+    if(victim){
+        PCB_t * victimPCB = findVictimPCB(frameNo);
+        if(victimPCB == NULL){
+            // Problem with findVictim();
+            return false;
+        }
+        updatePageTable(pcb, pageNumber, frameNo, frameNo);
+    }
+    // Update pcb of our file.
+    updatePageTable(pcb, pageNumber, frameNo, NO_VICTIM);
+    return true;
+
+}
+
+/*
+ * Function: isPageLoaded
+ * -----------------------------------------------------------------------
+ *  Verify the PCB to determine if the page is loaded to RAM
+ * 
+ *  Returns: true if loaded, false otherwise
+ */
+bool isPageLoaded(int pageNumber, PCB_t * pcb){
+    return pcb->pageTable[pageNumber] == -1 ? false : true;
 }
 
 /*
@@ -262,6 +311,28 @@ void loadPage(int pageNumber, FILE *f, int frameNumber){
 int findFrame(){
     // Make use of the ready queue.
     return dequeueFrame();
+}
+
+PCB_t * findVictimPCB(int frameNo){
+    PCB_LinkedList * list = getPCBReadyQueue();
+    PCB_Node_t * head = list->head;
+    if(head == NULL){
+        // UH OH, how did we get here? We shoudln't be calling
+        // this function without knowing that there is a program
+        // being victimized! If there are no PCB's in the queue, then WTF?!?
+        printf("UH OH. Issue finding RAM victim. Aborting\n");
+        return NULL;
+    }
+    while(head!=NULL){
+        for(int i = 0; i < NUMBER_OF_FRAMES; i++){
+            if(head->pcb->pageTable[i] = frameNo){
+                return head->pcb;
+            } 
+        }
+        head=head->next;
+    }
+    // If we got here without finding a victim, we have a problem.
+    return NULL;
 }
 
 /*
@@ -313,7 +384,7 @@ int updatePageTable(PCB_t * pcb, int pageNumber, int frameNumber, int victimFram
         // This needs to be done because it is not necessarily true that a certain page for
         // a PCB equates to that same page for another PCB
         for(int i = 0; i < NUMBER_OF_FRAMES; i++){
-            if(pcb->pageTable[i] == frameNumber){
+            if(pcb->pageTable[i] == victimFrame){
                 pcb->pageTable[i] = -1;
                 break;
             }

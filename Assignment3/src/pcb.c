@@ -17,9 +17,9 @@ PCB_LinkedList * readyList;
  */
 PCB_t * initPCB(int pid, int max_lines, int pages_max){
     PCB_t * pcb = malloc(sizeof(PCB_t));
-    pcb->PC=-1;
-    pcb->PC_offset = -1;
-    pcb->PC_page=-1;
+    pcb->PC= 0;
+    pcb->PC_offset = 0;
+    pcb->PC_page= 0;
     pcb->pid = pid;
     pcb->max_lines=max_lines;
     pcb->pages_max=pages_max;

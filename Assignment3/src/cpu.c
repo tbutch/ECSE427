@@ -17,11 +17,11 @@
 CPU_t * initCPU(){
     cpu = malloc(sizeof(CPU_t));
     cpu->quanta = BASE_QUANTA;
+    cpu->offset = 0;
     cpu->IP = CPU_START_ADDRESS;
     cpu->IR[0] = '\0';
     return cpu;
 }
-
 
 /*
  * Function: disposeCPU
@@ -39,20 +39,25 @@ void disposeCPU(){
  * -----------------------------------------------------------------------
  *  Function used to run programs for a given quanta.
  * 
- *  Returns: new instruction counter of cpu.
+ *  Returns: new instruction offset of CPU
  */
 int run(int quanta, mem_t * shellMemory[], int shellMemoryMaxSize, int maxInputSize){
     cpu->quanta=quanta;
     while(cpu->quanta > 0){
     //for(int i = 0; i < quanta; i++){
+        // Verify if instruction in RAM is null --> This would indicate end of program
+        if(ram[cpu->IP + cpu->offset] == NULL){
+            // Script execution is completed
+            break;
+        }
         // Fetch instruction from ram to CPU IR
-        strcpy(cpu->IR, ram[cpu->IP]);
+        strcpy(cpu->IR, ram[cpu->IP + cpu->offset]);
         // call interpreter.
         int status = parseAndEvaluate(cpu->IR, shellMemory, shellMemoryMaxSize, maxInputSize);
         // Increment Instruction pointer
         cpu->quanta--;
-        cpu->IP++;
+        cpu->offset++;
     }
     cpu->quanta=BASE_QUANTA;
-    return cpu->IP;
+    return cpu->offset;
 }

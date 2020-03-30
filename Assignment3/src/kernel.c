@@ -109,27 +109,39 @@ int myInit(char* fileName){
  *  Returns: Error codes as specified in interpreter.h
  */
 int scheduler(mem_t * shellMemory[], int shellMemoryMaxSize, int maxInputSize){
-    bool executionDone = false;
     
     // Initialize the CPU
-    while(!executionDone){
+    while(true){
         // a. It checks to see if the CPU is available. This means that the quanta is finished or nothing is currently assigned to the CPU
         if(cpu->quanta == BASE_QUANTA){
             // b. It copies the PC from the PCB into the IP of the CPU
             PCB_t * pcb = dequeuePCB();
-
             // If the PCB returned is NULL, then list is empty!
             if(pcb == NULL){
-                executionDone = true;
                 break;
+            }
+            // Determine if required page is loaded in RAM
+            bool pageLoaded = isPageLoaded(pcb->PC / FRAME_SIZE, pcb);
+            if(!pageLoaded){
+                // PageFault
+                loadPage(pcb->PC / FRAME_SIZE, pcb);
             }
             cpu->IP = pcb->PC;
             // c. It calls the run(quanta) function within cpu.c to run the script by copying quanta lines of code from ram[] using IP into the IR, which then calls: interpreter(IR)
 
-            // TODO: FIX THIS SHIT
+            // TODO: Verify THIS SHIT
             int quantaToRun = (pcb->max_lines - pcb->PC + 1 > BASE_QUANTA) ? BASE_QUANTA : pcb->max_lines - pcb->PC + 1;
-            int newPC = run(quantaToRun, shellMemory, shellMemoryMaxSize, maxInputSize);
-            pcb->PC = newPC;
+            int newOffset = run(quantaToRun, shellMemory, shellMemoryMaxSize, maxInputSize);
+            
+            if(newOffset == FRAME_SIZE){
+                // We have reached page end!
+                pcb->PC = pcb->PC + FRAME_SIZE;
+                pcb->PC_offset = 0;
+            } else {
+                pcb->PC_offset = newOffset;
+            }
+
+
             if(pcb->PC > pcb->max_lines){
                 // f. If the program is at the end, then the PCB terminates (as described previously / above)
                 disposePCB(pcb);

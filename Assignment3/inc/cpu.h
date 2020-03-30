@@ -6,6 +6,7 @@
 
 typedef struct{
     int IP;
+    int offset;
     char IR[USER_LINE_INPUT_SIZE];
     int quanta;
 } CPU_t;

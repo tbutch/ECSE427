@@ -24,6 +24,9 @@ static const char EXEC_COMMAND[] ="exec";
 // Add exit command cus Its exit in every other shell lol
 static const char EXIT_COMMAND[] ="exit";
 
+// Set to 1 to check for duplicate files when running exec commands.
+#define CHECK_DUPLICATE_NAMES 0
+
 // Exit codes - Makes it clearer when returning an
 // code from a function 
 static const int FATAL_ERROR = -1;
