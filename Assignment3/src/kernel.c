@@ -20,6 +20,8 @@
 // Function prototypes
 int boot();
 int prepareBackingStore();
+void updatePCB_PC_offset(PCB_t * pcb, int offset);
+int pageFault(PCB_t * pcb);
 
 /*
  * Function: main
@@ -109,7 +111,8 @@ int myInit(char* fileName){
  *  Returns: Error codes as specified in interpreter.h
  */
 int scheduler(mem_t * shellMemory[], int shellMemoryMaxSize, int maxInputSize){
-    
+    // Re-init CPU before scheduler runs, just in case
+    resetCPU();
     // Initialize the CPU
     while(true){
         // a. It checks to see if the CPU is available. This means that the quanta is finished or nothing is currently assigned to the CPU
@@ -121,39 +124,93 @@ int scheduler(mem_t * shellMemory[], int shellMemoryMaxSize, int maxInputSize){
                 break;
             }
             // Determine if required page is loaded in RAM
-            bool pageLoaded = isPageLoaded(pcb->PC / FRAME_SIZE, pcb);
+            bool pageLoaded = isPageLoaded(pcb->PC_page, pcb);
             if(!pageLoaded){
-                // PageFault
-                loadPage(pcb->PC / FRAME_SIZE, pcb);
+                // page fault sequence.
+                int status = pageFault(pcb);
+                if(status != SUCCESS){
+                    return status;
+                }
+                enqueuePCB(pcb);
+                continue;
             }
+
             cpu->IP = pcb->PC;
+            cpu->offset = pcb->PC_offset;
             // c. It calls the run(quanta) function within cpu.c to run the script by copying quanta lines of code from ram[] using IP into the IR, which then calls: interpreter(IR)
 
             // TODO: Verify THIS SHIT
-            int quantaToRun = (pcb->max_lines - pcb->PC + 1 > BASE_QUANTA) ? BASE_QUANTA : pcb->max_lines - pcb->PC + 1;
+            //int quantaToRun = (pcb->max_lines - (((pcb->PC_page + 1) * FRAME_SIZE) - 1) > BASE_QUANTA) ? BASE_QUANTA : pcb->max_lines - pcb->PC + 1;
+            int quantaToRun = BASE_QUANTA;
             int newOffset = run(quantaToRun, shellMemory, shellMemoryMaxSize, maxInputSize);
+
+            // Update PC and offset
+            updatePCB_PC_offset(pcb, newOffset);
             
-            if(newOffset == FRAME_SIZE){
-                // We have reached page end!
-                pcb->PC = pcb->PC + FRAME_SIZE;
-                pcb->PC_offset = 0;
-            } else {
-                pcb->PC_offset = newOffset;
-            }
-
-
-            if(pcb->PC > pcb->max_lines){
+            // Verify if at page end
+            if(((pcb->PC_page * FRAME_SIZE) + pcb->PC_offset) >= pcb->max_lines){
                 // f. If the program is at the end, then the PCB terminates (as described previously / above)
+                deleteFileInBackingStore(pcb);
+                // Free ram and add free frames back to queue
                 disposePCB(pcb);
+                
             } else {
                 // e. If the program is not at the end, then the PCB PC pointer is updated with the IP value and the PCB is placed at the tail of the ready queue.
+                pageLoaded = isPageLoaded(pcb->PC_page, pcb);
+                if(!pageLoaded){
+                    // page fault sequence.
+                    int status = pageFault(pcb);
+                    if(status != SUCCESS){
+                        return status;
+                    }
+                    pcb->PC = pcb->pageTable[pcb->PC_page] * FRAME_SIZE;
+                }
                 enqueuePCB(pcb);
             }
         }
     }
     cleanRam();
-
+    clearFrameQueue();
+    prepareBackingStore();
     return SUCCESS;
 }
 
 
+/*
+ * Function: updatePCB_PC_offset
+ * -----------------------------------------------------------------------
+ *   Function used to update the PCB and PC offset after execution returns.
+ * 
+ *  Returns: 0 if successful, 1 if not.
+ */
+void updatePCB_PC_offset(PCB_t * pcb, int newOffset){
+    if(newOffset == FRAME_SIZE){
+        // We have reached page end!
+        //pcb->PC = pcb->PC + FRAME_SIZE;
+        pcb->PC_page++;
+        pcb->PC = pcb->pageTable[pcb->PC_page] * FRAME_SIZE;
+        pcb->PC_offset = 0;
+    } else {
+        pcb->PC_offset = newOffset;
+    }
+}
+
+/*
+ * Function: pageFault
+ * -----------------------------------------------------------------------
+ *   Function used when a page needed by the program is not loaded in RAM
+ * 
+ *  Returns: Error codes as specified in shell.h
+ */
+int pageFault(PCB_t * pcb){
+    // PageFault sequence
+    loadPage(pcb->PC_page, pcb);
+    // TODO: Update PC! How because I don't have the frame number? --> Make load page return new frame
+    // Check the PCB pagetable and find the frame that way!
+    // Update PC
+    int frameNo = pcb->pageTable[pcb->PC_page];
+    if(frameNo == -1){
+        return RAM_LOAD_FAIL;
+    }
+    return SUCCESS;
+}

@@ -21,6 +21,7 @@
 #include "../inc/cpu.h"
 #include "../inc/stringUtilities.h"
 #include "../inc/kernel.h"
+#include "../inc/frameQueue.h"
 
 // Function prototypes
 void unknownCommand();
@@ -32,6 +33,7 @@ int runScript(char * wordArray[], mem_t * shellMemory[], int shellMemoryMaxSize,
 int parseInput(char * wordArray[], mem_t * shellMemory[], int shellMemoryMaxSize, int maxInputSize);
 void wipeWords(char * wordArray[], int arrayLength);
 int exec(char * wordArray[], mem_t * shellMemory[], int shellMemoryMaxSize, int maxInputSize);
+bool prepareFrameReadyQueue();
 
 // Define global array to avoid segfault lol
 char * wordArray[SHELL_MEMORY_SIZE];
@@ -361,7 +363,14 @@ int exec(char * wordArray[], mem_t * shellMemory[], int shellMemoryMaxSize, int 
             return MALFORMED_COMMAND;
         }
     }
+
     
+    // Prepare the FIFO Ready Queue by filling it with frames.
+    bool readyQueuePrepared = prepareFrameReadyQueue();
+    if(!readyQueuePrepared){
+        printf("Frame ready queue improperly initialized, aborting...\n");
+        return 0;
+    }
     for(int i = 1; i < inputLength; i++){
         int status = myInit(wordArray[i]);
 
@@ -385,4 +394,24 @@ void wipeWords(char * wordArray[], int arrayLength){
     for(int w = 0; w < arrayLength; w++){
         wordArray[w] = strdup("\0");
     }
+}
+
+/*
+ * Function: prepareFrameReadyQueue
+ * -----------------------------------------------------------------------
+ *  At program start, add all frames to ready queue.
+ * 
+ *  Returns: boolean on success status
+ */
+bool prepareFrameReadyQueue(){
+    for(int i = 0; i < NUMBER_OF_FRAMES; i++){
+        bool success = enqueueFrame(i);
+        if(!success){
+            printf("Error preparing the ready queue with available frames\n");
+            printf("Please verify that frame ready queue is properly initialized.\n ");
+            printf("Aborting...\n ");
+            return false;
+        }
+    }
+    return true;
 }

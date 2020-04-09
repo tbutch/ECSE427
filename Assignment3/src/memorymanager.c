@@ -24,6 +24,7 @@ int loadToRamInitial(PCB_t * pcb);
 int countLinesInFile(FILE * f);
 bool prepareFrameReadyQueue();
 PCB_t * findVictimPCB(int frameNo);
+void freeUsedRAM(PCB_t * pcb);
 
 /*
  * Function: launcher
@@ -46,13 +47,6 @@ int launcher(FILE *p){
 
     if(newFile == NULL){
         printf("Error opening backing store file, aborting...\n");
-        return 0;
-    }
-    
-    // Prepare the FIFO Ready Queue by filling it with frames.
-    bool readyQueuePrepared = prepareFrameReadyQueue();
-    if(!readyQueuePrepared){
-        printf("Frame ready queue improperly initialized, aborting...\n");
         return 0;
     }
 
@@ -103,19 +97,14 @@ int launcher(FILE *p){
 int loadToRamInitial(PCB_t * pcb){
     char currentLine[USER_LINE_INPUT_SIZE];
     int totalPagesToLoad = pcb->pages_max > 2? 2: pcb->pages_max;
-    for(int  pageNumber=0 ; pageNumber  < totalPagesToLoad; pageNumber++){
-        // int frameNo = findFrame();
-        // if(frameNo == -1){
-        //     frameNo = findVictim(pcb);
-        // }
-        // // Add required frame to RAM
-        // bool success = addPageToRAM(p, pcb, pageNumber, frameNo);
-        // if(!success){
-        //     return RAM_LOAD_FAIL;
-        // }
-        // // There are no victims here, so victim frame is NO_VICTIM
-        // updatePageTable(pcb, pageNumber, frameNo, NO_VICTIM);
+    for(int pageNumber=0 ; pageNumber  < totalPagesToLoad; pageNumber++){
         loadPage(pageNumber, pcb);
+        if(pageNumber == 0){
+            // PC is initiated to wherever the first page is loaded in RAM
+            pcb->PC = (pcb->pageTable[0] * FRAME_SIZE);
+            pcb->PC_page = 0;
+            pcb->PC_offset = 0;
+        }
     }
     return SUCCESS;
 }
@@ -273,7 +262,7 @@ bool loadPage(int pageNumber, PCB_t * pcb){
     if(!success){
         return RAM_LOAD_FAIL;
     }
-
+    fclose(p);
     // Update victim PCB to tell it that its program is no longer in RAM
     if(victim){
         PCB_t * victimPCB = findVictimPCB(frameNo);
@@ -393,22 +382,17 @@ int updatePageTable(PCB_t * pcb, int pageNumber, int frameNumber, int victimFram
     }
 }
 
-/*
- * Function: prepareFrameReadyQueue
- * -----------------------------------------------------------------------
- *  At program start, add all frames to ready queue.
- * 
- *  Returns: boolean on success status
- */
-bool prepareFrameReadyQueue(){
+bool deleteFileInBackingStore(PCB_t * pcb){
+    char cmd[100];
+    //snprintf(cmd, 100, "rm -q \"./BackingStore/%d\"", pcb->pid);
+    snprintf(cmd, 100, "del /f /q \".\\\\BackingStore\\\\%d\"", pcb->pid);
+    freeUsedRAM(pcb);
+}
+
+void freeUsedRAM(PCB_t * pcb){
     for(int i = 0; i < NUMBER_OF_FRAMES; i++){
-        bool success = enqueueFrame(i);
-        if(!success){
-            printf("Error preparing the ready queue with available frames\n");
-            printf("Please verify that frame ready queue is properly initialized.\n ");
-            printf("Aborting...\n ");
-            return false;
+        if(pcb->pageTable[i] != -1){
+            enqueueFrame(i);
         }
     }
-    return true;
 }

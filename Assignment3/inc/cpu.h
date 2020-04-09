@@ -20,5 +20,6 @@ CPU_t * cpu;
 CPU_t * initCPU();
 void disposeCPU();
 int run(int quanta, mem_t * shellMemory[], int shellMemoryMaxSize, int maxInputSize);
+CPU_t * resetCPU();
 
 #endif

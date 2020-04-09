@@ -11,6 +11,7 @@ int findFrame();
 int findVictim(PCB_t *pcb);
 int updatePageTable(PCB_t * pcb, int pageNumber, int frameNumber, int victimFrame);
 bool isPageLoaded(int pageNumber, PCB_t * pcb);
+bool deleteFileInBackingStore(PCB_t * pcb);
 
 // Constants
 static const int MAX_BACKING_STORE_FILES = 99;

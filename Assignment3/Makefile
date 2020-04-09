@@ -17,7 +17,7 @@ cpuDependencies:=$(srcDir)/cpu.c $(incDir)/cpu.h $(srcDir)/ram.c $(incDir)/ram.h
 				 $(srcDir)/shellmemory.c $(incDir)/shellmemory.h
 interpreterDependencies:=$(srcDir)/interpreter.c $(incDir)/interpreter.h $(srcDir)/shell.c $(incDir)/shell.h $(srcDir)/ram.c $(incDir)/ram.h \
 						 $(srcDir)/pcb.c $(incDir)/pcb.h $(srcDir)/cpu.c $(incDir)/cpu.h $(srcDir)/stringUtilities.c $(incDir)/stringUtilities.h \
-						 $(srcDir)/shellmemory.c $(incDir)/shellmemory.h
+						 $(srcDir)/shellmemory.c $(incDir)/shellmemory.h $(srcDir)/frameQueue.c $(incDir)/frameQueue.h
 pcbDependencies:=$(srcDir)/pcb.c $(incDir)/pcb.h
 shellmemoryDependencies:=$(srcDir)/shellmemory.c $(incDir)/shellmemory.h $(srcDir)/interpreter.c $(incDir)/interpreter.h \
 						 $(srcDir)/stringUtilities.c $(incDir)/stringUtilities.h

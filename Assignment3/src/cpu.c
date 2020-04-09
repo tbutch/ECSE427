@@ -23,6 +23,14 @@ CPU_t * initCPU(){
     return cpu;
 }
 
+CPU_t * resetCPU(){
+    cpu->quanta = BASE_QUANTA;
+    cpu->offset = 0;
+    cpu->IP = CPU_START_ADDRESS;
+    cpu->IR[0] = '\0';
+    return cpu;
+}
+
 /*
  * Function: disposeCPU
  * -----------------------------------------------------------------------
@@ -57,6 +65,10 @@ int run(int quanta, mem_t * shellMemory[], int shellMemoryMaxSize, int maxInputS
         // Increment Instruction pointer
         cpu->quanta--;
         cpu->offset++;
+        if(cpu->offset > 3){
+            // Reached the end of a page!
+            break;
+        }
     }
     cpu->quanta=BASE_QUANTA;
     return cpu->offset;
