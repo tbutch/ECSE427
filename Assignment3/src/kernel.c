@@ -200,7 +200,7 @@ void updatePCB_PC_offset(PCB_t * pcb, int newOffset){
  * -----------------------------------------------------------------------
  *   Function used when a page needed by the program is not loaded in RAM
  * 
- *  Returns: Error codes as specified in shell.h
+ *  Returns: Error codes as specified in interpreter.h
  */
 int pageFault(PCB_t * pcb){
     // PageFault sequence

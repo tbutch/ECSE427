@@ -124,7 +124,15 @@ FILE * copyFileToBackingStore(FILE  *p, int * pid){
         // If the directory does not exist, there was an error preparing the backing store
         return NULL;
     }
+    // Verify that file contains less than RAMSIZE lines.
+    rewind(p);
+    int lineCount = countLinesInFile(p);
+    rewind(p);
 
+    if(! (lineCount <= RAMSIZE)){
+        printf("Specified file contains %d lines. The maximum amount of lines is %d\n", lineCount, RAMSIZE);
+        return NULL;
+    }
     char dir[100];
     char cmd[100];
     *pid = fileCount;
@@ -137,15 +145,6 @@ FILE * copyFileToBackingStore(FILE  *p, int * pid){
         return NULL;
     }
 
-    // Verify that file contains less than RAMSIZE lines.
-    rewind(p);
-    int lineCount = countLinesInFile(p);
-    rewind(p);
-
-    if(! (lineCount <= RAMSIZE)){
-        printf("Specified file contains %d lines. The maximum amount of lines is %d\n`", lineCount, RAMSIZE);
-        return NULL;
-    }
     // Parse original file and echo that line to new file
     char buffer[USER_LINE_INPUT_SIZE];
     while(fgets(buffer, USER_LINE_INPUT_SIZE, p)){
@@ -270,7 +269,8 @@ bool loadPage(int pageNumber, PCB_t * pcb){
             // Problem with findVictim();
             return false;
         }
-        updatePageTable(pcb, pageNumber, frameNo, frameNo);
+        updatePageTable(victimPCB, pageNumber, frameNo, frameNo);
+        int w = 0;
     }
     // Update pcb of our file.
     updatePageTable(pcb, pageNumber, frameNo, NO_VICTIM);
@@ -314,7 +314,7 @@ PCB_t * findVictimPCB(int frameNo){
     }
     while(head!=NULL){
         for(int i = 0; i < NUMBER_OF_FRAMES; i++){
-            if(head->pcb->pageTable[i] = frameNo){
+            if(head->pcb->pageTable[i] == frameNo){
                 return head->pcb;
             } 
         }
@@ -343,13 +343,13 @@ int findVictim(PCB_t *pcb){
        for(int i = 0; i < NUMBER_OF_FRAMES; i++){
            if(pcb->pageTable[i] == randomNum){
                 randomNum = (randomNum + 1) % NUMBER_OF_FRAMES;
-                // Set to -1 so that counter is incremented to 0
+                // Set to -1 so that counter is reset to 0
                 i = -1;
            }
        }
        break;
    }
-   return -1;
+   return randomNum;
 }
 
 /*
