@@ -50,7 +50,14 @@ int shellUI(int argc, char** argv){
         
         // This if statement handles EOF.
         if(fgets(userInput, USER_LINE_INPUT_SIZE -1, stdin) == NULL){
-            break;
+            // restore keyboard input.
+            if (!freopen("CONIN$", "r", stdin)) {
+                perror("CONIN$");
+                printf("Error restoring keyboard input. Exiting...\n");
+                exit(1);
+            }   
+            continue;
+            //break;
         }
 
         status = parseAndEvaluate(userInput, shellMemory, SHELL_MEMORY_SIZE, USER_LINE_INPUT_SIZE);

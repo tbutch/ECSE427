@@ -29,7 +29,6 @@
 
 // Function prototypes
 int boot();
-int prepareBackingStore();
 void updatePCB_PC_offset(PCB_t * pcb, int offset);
 int pageFault(PCB_t * pcb);
 

@@ -376,6 +376,7 @@ int exec(char * wordArray[], mem_t * shellMemory[], int shellMemoryMaxSize, int 
 
         if(status == NONEXISTANT_FILE || status == RAM_LOAD_FAIL || status == FAILURE){
             cleanRam();
+            prepareBackingStore();
             return status;
         }
     }
