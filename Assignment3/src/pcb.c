@@ -1,7 +1,17 @@
+/**
+ * pcb.c file. This file contains functions used to manipulate the PCB_t
+ * struct, as well as the PCB ready queue, implemented as a linked list.
+ * 
+ * Author: Tristan Bouchard
+ * Date: April 9, 2020
+ * 
+ */
+
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 
+// File includes
 #include "../inc/pcb.h"
 
 // Global ready list

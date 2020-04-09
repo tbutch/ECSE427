@@ -1,3 +1,12 @@
+/**
+ * frameQueue header file. Here, the frameQueue Linked list struct is defined and the available
+ * API is described.
+ * 
+ * Author: Tristan Bouchard
+ * Date: April 29, 2020
+ * 
+ */
+
 #ifndef FRAME_QUEUE
 #define FRAME_QUEUE
 

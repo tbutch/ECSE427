@@ -1,3 +1,12 @@
+/**
+ * stringUtilities.c file. This file contains a few string functions created for ease
+ * of use.
+ * 
+ * Author: Tristan Bouchard
+ * Date: April 9, 2020
+ * 
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h> 

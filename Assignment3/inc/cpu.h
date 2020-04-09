@@ -1,3 +1,12 @@
+/**
+ * CPU header file. Here, the CPU struct is defined and the available
+ * API is described.
+ * 
+ * Author: Tristan Bouchard
+ * Date: April 29, 2020
+ * 
+ */
+
 #ifndef CPU
 #define CPU
 

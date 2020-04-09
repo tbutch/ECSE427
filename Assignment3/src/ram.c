@@ -1,3 +1,13 @@
+/**
+ * ram.c file. This file contains functions used to manipulate the RAM
+ * memory structure. RAM size can be modified and set on the RAM.h header,
+ * as well as the frame size and the number of frames.
+ * 
+ * Author: Tristan Bouchard
+ * Date: April 9, 2020
+ * 
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -6,43 +16,6 @@
 #include "../inc/ram.h"
 #include "../inc/shell.h"
 #include "../inc/stringUtilities.h"
-
-/*
- * Function: addToRAM
- * -----------------------------------------------------------------------
- *  Function used to add a file to the RAM memory.
- * 
- *  Returns: true if success, as well as start and end lines of the program
- *           as stored in memory, false otherwise.
- */
-bool addToRAM(FILE *p, int *start, int *end){
-    // Step 2: find the next available cell in ram[]
-    int nextLine = getNextAvailableLineInRam();
-    if(nextLine == -1){
-        // RAM is already full
-        return false;
-    }
-
-    *start = nextLine;
-    char buffer[USER_LINE_INPUT_SIZE];
-    // fgets(userInput, USER_LINE_INPUT_SIZE -1, stdin)
-    while(fgets(buffer, USER_LINE_INPUT_SIZE, p)){
-        // ignore newlines
-        if(isEqual(buffer,"\n")){
-            continue;
-        }
-        if(nextLine == RAMSIZE){
-            // RAM full, but program not completely copied!
-            return false;
-        }
-        // Step 3: copy all the lines of code into ram[]
-        ram[nextLine] = strdup(buffer);
-        nextLine++;
-    }
-    // Step 4: remember the start cell number and the ending cell number of that script in ram[]
-    *end = nextLine - 1;
-    return true;
-}
 
 /*
  * Function: addFrameToRAM

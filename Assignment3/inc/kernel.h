@@ -1,3 +1,12 @@
+/**
+ * kernel header file. Here, some constants used by the kernel are defined
+ * as well as certain public functions available as an API.
+ * 
+ * Author: Tristan Bouchard
+ * Date: April 29, 2020
+ * 
+ */
+
 #ifndef KERNEL
 #define KERNEL
 

@@ -1,8 +1,8 @@
 /**
- * Shell program file of the Tristan Bouchard shell, which contains the shellUI() function
+ * shell.c program file of the Tristan Bouchard shell, which contains the shellUI() function
  * called by the kernel.
  * All assumtions taken when programming this assignment are available in the 
- * README.md file in the Assignment1 directory
+ * README.md file in the Assignment3 directory
  * 
  * Author: Tristan Bouchard
  * Date: January 29 2020
@@ -33,7 +33,6 @@ void runScriptFromCommandLine(int argc, char ** argv, mem_t * shellMemory[], int
 char prompt[USER_LINE_INPUT_SIZE] = {'$', ' '};
 char userInput[USER_LINE_INPUT_SIZE];
 int status = 0;
-//
 
 /*
  * Public function: main(char argc, cha* argc[])

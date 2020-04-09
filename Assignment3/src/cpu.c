@@ -1,3 +1,12 @@
+/**
+ * cpu.c file. This file contains the main CPU managing functions, 
+ * as well as the CPU run functions.
+ * 
+ * Author: Tristan Bouchard
+ * Date: April 9, 2020
+ * 
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -23,6 +32,14 @@ CPU_t * initCPU(){
     return cpu;
 }
 
+/*
+ * Function: initCPU
+ * -----------------------------------------------------------------------
+ *  Function used to reset CPU struct to a known state before starting and
+ *  exec function.
+ * 
+ *  Returns: CPU_t pointer
+ */
 CPU_t * resetCPU(){
     cpu->quanta = BASE_QUANTA;
     cpu->offset = 0;

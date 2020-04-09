@@ -1,3 +1,12 @@
+/**
+ * memorymanager header file. Here, certain constants used by the memorymanager
+ * are defined, and the public API is described.
+ * 
+ * Author: Tristan Bouchard
+ * Date: April 29, 2020
+ * 
+ */
+
 #ifndef MEM_MANAGER
 #define MEM_MANAGER
 

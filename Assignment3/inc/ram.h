@@ -1,3 +1,12 @@
+/**
+ * RAM header file. Here, constants and available functions provided by the RAM.c API 
+ * can be found and used.
+ * 
+ * Author: Tristan Bouchard
+ * Date: April 29, 2020
+ * 
+ */
+
 #ifndef RAM
 #define RAM
 
@@ -14,7 +23,6 @@
 char * ram[RAMSIZE];
 
 // public API
-bool addToRAM(FILE * p , int * start, int * end);
 bool cleanRam();
 bool initRam();
 int getNextAvailableLineInRam();

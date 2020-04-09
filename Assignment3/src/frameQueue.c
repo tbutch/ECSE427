@@ -1,3 +1,12 @@
+/**
+ * frameQueue.c file. This file contains the functions used to manipulate
+ * the frameReadyList linked list, which contains available RAM frames.
+ * 
+ * Author: Tristan Bouchard
+ * Date: April 9, 2020
+ * 
+ */
+
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -8,11 +17,11 @@
 Frame_LinkedList * frameReadyList;
 
 /*
- * Function: initPCBNode
+ * Function: initFrameNode
  * -----------------------------------------------------------------------
- *  Function used to init a new PCB_Node_t
+ *  Function used to init a new Frame_Node_t
  * 
- *  Returns: PCB_Node_t pointer
+ *  Returns: Frame_Node_t pointer
  */
 Frame_Node_t * initFrameNode(int frameNo){
     Frame_Node_t * frameNode = malloc(sizeof(Frame_Node_t));

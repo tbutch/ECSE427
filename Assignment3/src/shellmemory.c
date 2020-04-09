@@ -1,5 +1,5 @@
 /**
- * ShellMemory.c file. This file contains functions to manipulate the shellMemory array
+ * shellmemory.c file. This file contains functions to manipulate the shellMemory array
  * specified in the function arguments. It assumes that the array is well formed, without
  * any holes in the array (aka missing values).
  * 
@@ -82,18 +82,9 @@ int addMemoryNodeToShellMem(mem_t * shellMemory[], int maxMemSize, char * wordsA
  *  Returns: 1 if successful, 0 if not.
  */
 int addMemoryNodeToShellMemAtIndex(mem_t * shellMemory[], int maxMemSize, char * wordsArray[], int index, int lengthOfInput){
-    // char str[1000] = "";
-    // for(int w = 2; w < lengthOfInput; w++){
-    //     strcat(str, wordsArray[w]);
-    //     if(w != lengthOfInput -1){
-    //         strcat(str, " ");
-    //     }
-    // }
     char * str = wordsArray[2];
     free(shellMemory[index]->var);
     free(shellMemory[index]->value);
-    //shellMemory[index]->var = malloc((strlen(wordsArray[1]) + 1) * sizeof(char));
-    //shellMemory[index]->value = malloc((strlen(str) + 1) * sizeof(char));
     shellMemory[index]->var = strdup(wordsArray[1]);
     shellMemory[index]->value = strdup(str);
     return SUCCESS;

@@ -1,3 +1,12 @@
+/**
+ * PCB header file. Here, the PCB, as well as the PCB ready queue, implemented as a linked list.
+ * API functions are also described.
+ * 
+ * Author: Tristan Bouchard
+ * Date: April 29, 2020
+ * 
+ */
+
 #ifndef PCB
 #define PCB
 

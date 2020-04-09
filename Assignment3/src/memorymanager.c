@@ -1,3 +1,13 @@
+/**
+ * memorymanager.c file. This file contains the main memory managing functions such as 
+ * loading program pages to RAM, initiating RAM slots, taking care of updating page tables
+ * and maintaining the backing store.
+ * 
+ * Author: Tristan Bouchard
+ * Date: April 9, 2020
+ * 
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -159,6 +169,14 @@ FILE * copyFileToBackingStore(FILE  *p, int * pid){
     return fp;
 }
 
+/*
+ * Function: countFilesInBackingStore
+ * -----------------------------------------------------------------------
+ *  Function used to count the files currently in the backing store. This
+ *  is principally used to obtain a process ID number during program initiation
+ * 
+ *  Returns: Backing store file pointer.
+ */
 int countFilesInBackingStore(){
     DIR* dir = opendir(BACKING_STORE_NAME);
     struct dirent * ent;
@@ -302,6 +320,15 @@ int findFrame(){
     return dequeueFrame();
 }
 
+/*
+ * Function: findVictimPCB
+ * -----------------------------------------------------------------------
+ *  This function is used to obtain the victim PCB that contains the frame 
+ *  specified by findVictim. It searches the PCB's in the ready queue, which
+ *  there must be at least one, or else the findVictim function is broken.
+ * 
+ *  Returns: void
+ */
 PCB_t * findVictimPCB(int frameNo){
     PCB_LinkedList * list = getPCBReadyQueue();
     PCB_Node_t * head = list->head;
@@ -359,13 +386,6 @@ int findVictim(PCB_t *pcb){
  *  set to -1 to indicate there is no need to update the other PCB.
  */
 int updatePageTable(PCB_t * pcb, int pageNumber, int frameNumber, int victimFrame){
-    /*
-    The page tables must also be updated to reflect the changes. 
-    If a victim was selected then the PCB page table of the victim must be updated.
-    We do this once for the PCB asking for the page fault, and we might do it again for the victim PCB 
-    (if there was one).
-    p->pageTable[pageNumber] = frameNumber (or = victimFrame).
-    */
     if(victimFrame == -1){
         pcb->pageTable[pageNumber] = frameNumber;
     } else {
@@ -378,17 +398,31 @@ int updatePageTable(PCB_t * pcb, int pageNumber, int frameNumber, int victimFram
                 break;
             }
         }
-         
     }
 }
 
+/*
+ * Function: deleteFileInBackingStore
+ * -----------------------------------------------------------------------
+ *  Function used to delete file in Backing Store one execution is complete.
+ * 
+ * returns: Boolean on success.
+ */
 bool deleteFileInBackingStore(PCB_t * pcb){
     char cmd[100];
-    //snprintf(cmd, 100, "rm -q \"./BackingStore/%d\"", pcb->pid);
     snprintf(cmd, 100, "del /f /q \".\\\\BackingStore\\\\%d\"", pcb->pid);
     freeUsedRAM(pcb);
+    return true;
 }
 
+/*
+ * Function: freeUsedRAM
+ * -----------------------------------------------------------------------
+ *  Function used to free the RAM a program was using and allow those frames
+ *  to be used once again by adding them to the frame ready queue.
+ * 
+ * returns: void
+ */
 void freeUsedRAM(PCB_t * pcb){
     for(int i = 0; i < NUMBER_OF_FRAMES; i++){
         if(pcb->pageTable[i] != -1){

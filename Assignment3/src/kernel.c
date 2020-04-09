@@ -1,3 +1,13 @@
+/**
+ * kernel.c file. This file contains the kernel functions, notably the program initiation
+ * and the scheduler. It is in charge of preparing the resources used by the shell and initiating
+ * the shell.
+ * 
+ * Author: Tristan Bouchard
+ * Date: April 9, 2020
+ * 
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <dirent.h>
@@ -113,9 +123,8 @@ int myInit(char* fileName){
 int scheduler(mem_t * shellMemory[], int shellMemoryMaxSize, int maxInputSize){
     // Re-init CPU before scheduler runs, just in case
     resetCPU();
-    // Initialize the CPU
+
     while(true){
-        // a. It checks to see if the CPU is available. This means that the quanta is finished or nothing is currently assigned to the CPU
         if(cpu->quanta == BASE_QUANTA){
             // b. It copies the PC from the PCB into the IP of the CPU
             PCB_t * pcb = dequeuePCB();
@@ -135,14 +144,11 @@ int scheduler(mem_t * shellMemory[], int shellMemoryMaxSize, int maxInputSize){
                 continue;
             }
 
+            // Set CPU values before running instruction.
             cpu->IP = pcb->PC;
             cpu->offset = pcb->PC_offset;
-            // c. It calls the run(quanta) function within cpu.c to run the script by copying quanta lines of code from ram[] using IP into the IR, which then calls: interpreter(IR)
 
-            // TODO: Verify THIS SHIT
-            //int quantaToRun = (pcb->max_lines - (((pcb->PC_page + 1) * FRAME_SIZE) - 1) > BASE_QUANTA) ? BASE_QUANTA : pcb->max_lines - pcb->PC + 1;
-            int quantaToRun = BASE_QUANTA;
-            int newOffset = run(quantaToRun, shellMemory, shellMemoryMaxSize, maxInputSize);
+            int newOffset = run(BASE_QUANTA, shellMemory, shellMemoryMaxSize, maxInputSize);
 
             // Update PC and offset
             updatePCB_PC_offset(pcb, newOffset);
@@ -165,10 +171,13 @@ int scheduler(mem_t * shellMemory[], int shellMemoryMaxSize, int maxInputSize){
                     }
                     pcb->PC = pcb->pageTable[pcb->PC_page] * FRAME_SIZE;
                 }
+                // If execution is not complete, add to queue.
                 enqueuePCB(pcb);
             }
         }
     }
+
+    // Once execution is complete, clean RAM and empty the frameQueue
     cleanRam();
     clearFrameQueue();
     prepareBackingStore();
