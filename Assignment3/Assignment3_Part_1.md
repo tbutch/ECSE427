@@ -68,7 +68,6 @@ Requested Page | Page Frame 0 | Page Frame 1 | Page Frame 2 | Page Frame 3 | FIF
 2  | 0 | 1 | 7 | 2 | 3210 | 4
 3  | 3 | 1 | 7 | 2 | 0321 | 5
 2  | 3 | 1 | 7 | 2 | 0321 | 5
-3  | 3 | 1 | 7 | 2 | 0321 | 5
 7  | 3 | 1 | 7 | 2 | 0321 | 5
 1  | 3 | 1 | 7 | 2 | 0321 | 5
 0  | 3 | 0 | 7 | 2 | 1032 | 6
@@ -86,13 +85,12 @@ Requested Page | Page Frame 0 | Page Frame 1 | Page Frame 2 | Page Frame 3 | LRU
 2  | 0 | 1 | 7 | 2 | 3210 | 4
 3  | 3 | 1 | 7 | 2 | 0321 | 5
 2  | 3 | 1 | 7 | 2 | 3021 | 5
-3  | 3 | 1 | 7 | 2 | 0321 | 5
-7  | 3 | 1 | 7 | 2 | 2031 | 5
-1  | 3 | 1 | 7 | 2 | 1032 | 5
-0  | 3 | 1 | 0 | 2 | 3102 | 6
-3  | 3 | 0 | 7 | 2 | 1302 | 6
+7  | 3 | 1 | 7 | 2 | 2301 | 5
+1  | 3 | 1 | 7 | 2 | 2310 | 5
+0  | 0 | 1 | 7 | 2 | 2310 | 6
+3  | 0 | 3 | 7 | 2 | 0231 | 7
 
-**There are therefore 6 page faults caused using the LRU page replacement strategy**
+**There are therefore 7 page faults caused using the LRU page replacement strategy**
 
 ## Question 4: P. 258 #38
 _Fragment A_
