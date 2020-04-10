@@ -4,3 +4,4 @@ This repository contains the work I performed this semester in the context of EC
 
 [Assignment 1 - mysh.exe](./Assignment1)
 [Assignment 2 - mykernel.exe](./Assignment2)
+[Assignment 3 - mykernel.exe, with paging](./Assignment3)
