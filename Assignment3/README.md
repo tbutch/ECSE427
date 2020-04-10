@@ -16,7 +16,7 @@ or
 
 See the [Script assumptions](#scriptAssumptions) section below for more information on well-formed scripts.
 
-To find the textbook questions section of this assignment, see [Assignment 3 Part 1](./Assignment3_Part_1.md)
+To find the textbook questions section of this assignment, see [Assignment 3 Part 1](./Assignment3_Part_1 - Grip.md)
 
 ## Exec Command
 This shell is capable of running up to 3 well formed scripts. The script names must not necessarily all be different, there may be duplicates. If the specified programs do not fit in RAM completely, the RAM is flushed and no script is executed. The maximum script size at the moment is limited by the RAM size, which corresponds to 40 lines of code maximum.
